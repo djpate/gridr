@@ -212,9 +212,11 @@ export default class App extends Vue {
   position: absolute;
   top: 100px;
   left: 100px;
+  z-index: 100;
   &.snapped {
     transition-property: left, top, height, width;
     transition-duration: .5s;
+    z-index: 1;
   }
   .inner {
     padding: 10px;
