@@ -1,12 +1,15 @@
 <template>
-  <div class="grid" ref='grid'>
+  <div class="add">
+    <div class="new" @mousedown='addNewWidget'>Some widget</div>
+  </div>
+  <div class="grid" ref='gridContainer'>
     <div class="shadowGrid">
       <div class="row" v-for='(row, id) in rows' :key='id' >
         <div class="col" v-for='(col, id) in cols' :key='id'></div>
       </div>
     </div>
     <div class="ghost" ref='ghost'></div>
-    <Widget v-for='(placement, id) in widgets' :rowHeight='rowHeight' :colWidth='colWidth' :gridWidth='gridWidth' :id='id' :key='id' :placement='placement' @snap='snap' @hideGrid='hideSnapGrid' @resizing='showSnapGrid'></Widget>
+    <Widget v-for='widget in widgets' @destroy='removeWidget' :grid='grid' :widget='widget' :key='widget.id' @snap='snap' @hideGrid='hideSnapGrid' @resizing='showSnapGrid'></Widget>
   </div>
 </template>
 
@@ -14,7 +17,7 @@
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/Widget.vue';
 import { Placement } from './components/types'
-import { reactive } from '@vue/reactivity';
+import { Grid, Widget as GridWidget } from './lib/grid';
 
 type Coords = {
   width: number
@@ -32,71 +35,74 @@ export default class App extends Vue {
   rows = 0
   cols = 0
 
-  rowHeight = 150
-  colWidth = 0
-  gridWidth = 0
+  grid: Grid | null = null
 
-  widgets: {[key: string]: Placement} = reactive({
-    "1": {
+  mounted(): void {
+    this.grid = new Grid((this.$refs.gridContainer as HTMLDivElement).clientWidth, 6)
+    this.grid.addWidget(new GridWidget({
       col: 0,
       row: 0,
       width: 2,
       height: 1
-    },
-    "2": {
+    }))
+    this.grid.addWidget(new GridWidget({
       col: 1,
       row: 3,
       width: 1,
       height: 2
-    }
-  })
-
-  mounted(): void {
+    }))
     this.setColWidth()
     window.addEventListener("resize", this.setColWidth);
   }
 
-
-  setColWidth(): void {
-    this.gridWidth = (this.$refs.grid as HTMLDivElement).clientWidth;
-    this.colWidth = (this.gridWidth - 100) / 6 // 100 is for 20px padding * 5, 2 is for the border
+  get widgets(): GridWidget[] {
+    if (!this.grid) return [] as any[]
+    return this.grid.widgets
   }
 
-  snap(payload: {key: string, coords: Coords}): void {
-    let height = Math.ceil(payload.coords.height / this.rowHeight)
-    let placement: Placement  = {
-      col: Math.floor(payload.coords.left / this.colWidth),
-      row: Math.floor(payload.coords.top / (this.rowHeight)),
-      width: Math.ceil(payload.coords.width / (this.colWidth + 20)),
-      height: Math.ceil(payload.coords.height / (this.rowHeight + 20))
-    }
-    this.widgets[payload.key] = placement
+
+  setColWidth(): void {
+    this.grid!.width = (this.$refs.gridContainer as HTMLDivElement).clientWidth;
+  }
+
+  snap(payload: {widget: GridWidget, coords: Coords}): void {
+    let placement = this.grid!.snappedPlacement(payload.widget, payload.coords)
+    payload.widget.placement = placement
     this.hideSnapGrid();
+  }
+
+
+  showSnapGrid(payload: {widget: GridWidget, coords: Coords}): void {
+    if (!this.grid) return
+    let placement = this.grid?.snappedPlacement(payload.widget, payload.coords)
+    this.cols = Math.min(6, placement.col + placement.width + 1)
+    this.rows = placement.row + placement.height + 1
+    this.displayShadow(placement)
+  }
+
+  displayShadow(placement: Placement) {
+    if (!this.grid) return
+    let ghost = (this.$refs.ghost as HTMLDivElement)
+    ghost.style.display = 'block';
+    ghost.style.top = Math.max(0, ((placement.row * this.grid.rowHeight) + (placement.row * 20) + 10)) + 'px';
+    ghost.style.left = ((placement.col * this.grid.columnWidth) + (placement.col * 20) + 10) + 'px';
+    ghost.style.width = (placement.width * this.grid.columnWidth) + (placement.width * 20) - 40 + 'px';
+    ghost.style.height = (placement.height * this.grid.rowHeight) + (placement.height * 20) - 40 + 'px';
+  }
+
+  hideSnapGrid(): void {
+    this.rows = 0;
+    this.cols = 0;
     (this.$refs.ghost as HTMLDivElement).style.display = 'none';
   }
 
-
-  showSnapGrid(coords: Coords): void {
-    console.log(coords)
-    let maxX = coords.left + coords.width
-    let maxY = coords.top + coords.height
-    this.cols = Math.min(6, Math.ceil(maxX / this.colWidth) + 1);
-    this.rows = Math.ceil(maxY / 150);
-    let predictedStartRow = Math.floor(coords.top / 150);
-    let predictedStartCol = Math.floor(coords.left / this.colWidth);
-    let predictedEndCol = Math.ceil(coords.width / (this.colWidth+ 20));
-    let predictedEndRow = Math.ceil(coords.height / (this.rowHeight + 20));
-    let ghost = (this.$refs.ghost as HTMLDivElement)
-    ghost.style.display = 'block';
-    ghost.style.top = Math.max(0, ((predictedStartRow * this.rowHeight) + (predictedStartRow * 20) + 10)) + 'px';
-    ghost.style.left = ((predictedStartCol * this.colWidth) + (predictedStartCol * 20) + 10) + 'px';
-    ghost.style.width = (predictedEndCol * this.colWidth) + (predictedEndCol * 20) - 40 + 'px';
-    ghost.style.height = (predictedEndRow * this.rowHeight) + (predictedEndRow * 20) - 40 + 'px';
+  removeWidget(id: string): void {
+    this.grid!.removeWidget(id)
   }
 
-  hideSnapGrid() {
-    this.rows = 0
-    this.cols = 0
+  addNewWidget(): void {
+    let widget = new GridWidget({width: 1, height: 1, col: 5, row:1})
+    this.grid!.addWidget(widget)
   }
 }
 </script>
@@ -111,6 +117,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   margin-top: 60px;
+  .add {
+    margin: 0 20px;
+    user-select: none;
+    .new {
+      border: 1px solid black;
+      height: 100px;
+      width: 250px;
+      cursor: grab;
+    }
+  }
   .grid {
     margin: 20px;
     position: relative;
@@ -126,6 +142,7 @@ body {
       border-radius: 15px;
       position: absolute;
       opacity: 0.5;
+      display: none;
     }
     .row {
       display: flex;

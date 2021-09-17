@@ -1,7 +1,10 @@
 <template>
   <div class="widget_container" ref='container' :class="{ snapped: snapped }">
     <div class="inner">
-      <div class="title" @mousedown='startDrag'>My Title</div>
+      <div class="title">
+        <h1 @mousedown='startDrag'>My Title</h1>
+        <span class="close" @click='destroy'>X</span>
+      </div>
       <span>Hello</span>
     </div>
     <div class='resizer top-left' @mousedown="startResize"></div>
@@ -12,13 +15,13 @@
 </template>
 
 <script lang="ts">
-import { constrainedInGrid, getCoordsForElement } from '@/lib/grid';
+import { constrainedInGrid, getCoordsForElement, Grid, Widget } from '@/lib/grid';
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator'
 import { Coords, Placement } from './types';
 
 @Options({})
-export default class App extends Vue {
+export default class WidgetComponent extends Vue {
   currentDragger: HTMLElement | null = null;
   original_width = 0
   original_height = 0
@@ -30,26 +33,19 @@ export default class App extends Vue {
   original_y = 0
   dragging = false
 
-  @Prop()
-  placement!: Placement;
-
-  @Prop()
-  id!: string 
-
-  @Prop() rowHeight!: number
-  @Prop() colWidth!: number
-  @Prop() gridWidth!: number
+  @Prop() widget!: Widget
+  @Prop() grid!: Grid
 
   mounted(): void {
     this.placeInGrid()
   }
 
-  @Watch('colWidth')
+  @Watch('grid.columnWidth')
   onWidthChange(): void {
     this.placeInGrid()
   }
 
-  @Watch('placement')
+  @Watch('widget.placement')
   onPlacementChange() {
     this.placeInGrid()
   }
@@ -60,10 +56,10 @@ export default class App extends Vue {
 
   placeInGrid(): void {
     this.setCoords({
-      top: this.placement.row * this.rowHeight + this.placement.row * 20,
-      left: (this.placement.col * this.colWidth) + this.placement.col * 20,
-      width: Math.floor(this.colWidth * this.placement.width + (this.placement.width - 1) * 20),
-      height: Math.floor(this.rowHeight * this.placement.height + (this.placement.height - 1) * 20),
+      top: this.widget.placement.row * this.grid.rowHeight + this.widget.placement.row * 20,
+      left: (this.widget.placement.col * this.grid.columnWidth) + this.widget.placement.col * 20,
+      width: Math.floor(this.grid.columnWidth * this.widget.placement.width + (this.widget.placement.width - 1) * 20),
+      height: Math.floor(this.grid.rowHeight * this.widget.placement.height + (this.widget.placement.height - 1) * 20),
     })
   }
 
@@ -90,14 +86,14 @@ export default class App extends Vue {
       left: event.pageX - this.original_offset_x
     }
     this.setCoords(coords)
-    this.$emit('resizing', coords)
+    this.$emit('resizing', {coords: coords, widget: this.widget})
   }
 
   stopDrag(event: MouseEvent) {
     event.preventDefault()
     window.removeEventListener('mousemove', this.drag)
     window.removeEventListener('mouseup', this.drag)
-    this.$emit('snap', {key: this.id, coords: this.currentCoords()})
+    this.$emit('snap', {widget: this.widget, coords: this.currentCoords()})
     this.dragging = false
   }
 
@@ -119,7 +115,7 @@ export default class App extends Vue {
     this.currentDragger = null
     window.removeEventListener('mousemove', this.resize)
     window.removeEventListener('mouseup', this.stopResize)
-    this.$emit('snap', {key: this.id, coords: this.currentCoords()})
+    this.$emit('snap', {widget: this.widget, coords: this.currentCoords()})
   }
 
   resize(event: MouseEvent) {
@@ -137,7 +133,7 @@ export default class App extends Vue {
     if(!coords) return
     
     this.setCoords(coords)
-    this.$emit('resizing', coords)
+    this.$emit('resizing', {coords: coords, widget: this.widget})
   }
 
   get resizing() {
@@ -149,7 +145,7 @@ export default class App extends Vue {
   }
 
   setCoords(coords: Coords) {
-    let constrainedCoords = constrainedInGrid(coords, this.gridWidth)
+    let constrainedCoords = constrainedInGrid(coords, this.grid.width)
     this.container().style.height = constrainedCoords.height + 'px'
     this.container().style.width = constrainedCoords.width + 'px'
     this.container().style.top = constrainedCoords.top + 'px'
@@ -191,6 +187,10 @@ export default class App extends Vue {
       left: this.original_x + (event.pageX - this.original_mouse_x)
     }
   }
+
+  destroy() {
+    this.$emit('destroy', this.widget.id)
+  }
 }
 </script>
 
@@ -225,7 +225,18 @@ export default class App extends Vue {
       font-weight: bold;
       border-bottom: 1px solid grey;
       padding: 5px;
-      cursor: grab;
+      display: flex;
+      h1 {
+        display: inline-block;
+        margin: 0;
+        font-size: 20px;
+        flex-grow: 1;
+        cursor: grab;
+      }
+      .close {
+        cursor: pointer;
+        justify-self: end;
+      }
     }
   }
   .resizer{
