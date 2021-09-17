@@ -204,9 +204,10 @@ export default class App extends Vue {
 }
 
 .widget_container {
-  border: 1px solid black;
+  border: 1px solid grey;
   // min-width: 200px;
   // min-height: 100px;
+  filter: drop-shadow(5px 5px 2px #e1e1e1);
   background-color: white;
   position: absolute;
   top: 100px;
@@ -222,6 +223,7 @@ export default class App extends Vue {
       font-weight: bold;
       border-bottom: 1px solid grey;
       padding: 5px;
+      cursor: grab;
     }
   }
   .resizer{
