@@ -8,8 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.173",
     "core-js": "^3.8.3",
     "interactjs": "^1.10.11",
+    "lodash": "^4.17.21",
     "sass": "^1.41.0",
     "sass-loader": "^12.1.0",
     "uuid": "^8.3.2",
