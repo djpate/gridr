@@ -15,10 +15,11 @@
 </template>
 
 <script lang="ts">
-import { constrainedInGrid, getCoordsForElement, Grid, Widget } from '@/lib/grid';
+import { Grid } from '@/lib/grid';
+import { Widget } from '@/lib/widget';
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator'
-import { Coords, Placement } from './types';
+import { Coords } from './types';
 
 @Options({})
 export default class WidgetComponent extends Vue {
@@ -37,37 +38,23 @@ export default class WidgetComponent extends Vue {
   @Prop() grid!: Grid
 
   mounted(): void {
-    this.placeInGrid()
+    this.widget.element = this.container()
+    this.grid.snap(this.widget)
   }
 
-  @Watch('grid.columnWidth')
-  onWidthChange(): void {
-    this.placeInGrid()
+  get resizing(): boolean {
+    return !!this.currentDragger
   }
 
-  @Watch('widget.placement')
-  onPlacementChange() {
-    this.placeInGrid()
-  }
-
-  get snapped() {
+  get snapped(): boolean {
     return !this.resizing && !this.dragging
-  }
-
-  placeInGrid(): void {
-    this.setCoords({
-      top: this.widget.placement.row * this.grid.rowHeight + this.widget.placement.row * 20,
-      left: (this.widget.placement.col * this.grid.columnWidth) + this.widget.placement.col * 20,
-      width: Math.floor(this.grid.columnWidth * this.widget.placement.width + (this.widget.placement.width - 1) * 20),
-      height: Math.floor(this.grid.rowHeight * this.widget.placement.height + (this.widget.placement.height - 1) * 20),
-    })
   }
 
   container(): HTMLDivElement {
     return this.$refs.container as HTMLDivElement
   }
 
-  startDrag(event: MouseEvent) {
+  startDrag(event: MouseEvent): void {
     event.preventDefault()
     this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
     this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
@@ -78,26 +65,27 @@ export default class WidgetComponent extends Vue {
     window.addEventListener('mouseup', this.stopDrag)
   }
 
-  drag(event: MouseEvent) {
+  drag(event: MouseEvent): void  {
     let coords = {
       width: this.original_width,
       height: this.original_height,
       top: event.pageY - this.container().parentElement!.offsetTop - this.original_offset_y,
       left: event.pageX - this.original_offset_x
     }
-    this.setCoords(coords)
-    this.$emit('resizing', {coords: coords, widget: this.widget})
+    this.widget.coords = coords
+    this.$emit('resizing', this.widget)
   }
 
-  stopDrag(event: MouseEvent) {
+  stopDrag(event: MouseEvent): void  {
     event.preventDefault()
     window.removeEventListener('mousemove', this.drag)
     window.removeEventListener('mouseup', this.drag)
-    this.$emit('snap', {widget: this.widget, coords: this.currentCoords()})
+    this.grid.snap(this.widget)
+    this.$emit('snapped', this.widget)
     this.dragging = false
   }
 
-  startResize(event: MouseEvent) {
+  startResize(event: MouseEvent): void  {
     event.preventDefault()
     this.currentDragger = event.target as HTMLElement;
     this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
@@ -110,15 +98,16 @@ export default class WidgetComponent extends Vue {
     window.addEventListener('mouseup', this.stopResize)
   }
 
-  stopResize(event: MouseEvent) {
+  stopResize(event: MouseEvent): void  {
     event.preventDefault()
     this.currentDragger = null
     window.removeEventListener('mousemove', this.resize)
     window.removeEventListener('mouseup', this.stopResize)
-    this.$emit('snap', {widget: this.widget, coords: this.currentCoords()})
+    this.grid.snap(this.widget)
+    this.$emit('snapped', this.widget)
   }
 
-  resize(event: MouseEvent) {
+  resize(event: MouseEvent): void  {
     if (!this.currentDragger) return
     let coords: Coords | null
     let classList = this.currentDragger.classList
@@ -132,24 +121,8 @@ export default class WidgetComponent extends Vue {
       coords = this.topLeft(event)
     if(!coords) return
     
-    this.setCoords(coords)
-    this.$emit('resizing', {coords: coords, widget: this.widget})
-  }
-
-  get resizing() {
-    return !!this.currentDragger
-  }
-
-  currentCoords(): Coords {
-    return getCoordsForElement(this.container())
-  }
-
-  setCoords(coords: Coords) {
-    let constrainedCoords = constrainedInGrid(coords, this.grid.width)
-    this.container().style.height = constrainedCoords.height + 'px'
-    this.container().style.width = constrainedCoords.width + 'px'
-    this.container().style.top = constrainedCoords.top + 'px'
-    this.container().style.left = constrainedCoords.left + 'px'
+    this.widget.coords = coords
+    this.$emit('resizing', this.widget)
   }
 
   bottomRight(event: MouseEvent): Coords {
@@ -188,25 +161,15 @@ export default class WidgetComponent extends Vue {
     }
   }
 
-  destroy() {
+  destroy(): void {
     this.$emit('destroy', this.widget.id)
   }
 }
 </script>
 
-<style lang='scss'>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
+<style lang='scss' scoped>
 .widget_container {
   border: 1px solid grey;
-  // min-width: 200px;
-  // min-height: 100px;
   filter: drop-shadow(5px 5px 2px #e1e1e1);
   background-color: white;
   position: absolute;

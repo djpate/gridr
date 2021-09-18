@@ -9,7 +9,14 @@
       </div>
     </div>
     <div class="ghost" ref='ghost'></div>
-    <Widget v-for='widget in widgets' @destroy='removeWidget' :grid='grid' :widget='widget' :key='widget.id' @snap='snap' @hideGrid='hideSnapGrid' @resizing='showSnapGrid'></Widget>
+    <Widget v-for='widget in widgets'
+            :grid='grid' 
+            :widget='widget' 
+            :key='widget.id' 
+            @snapped='hideSnapGrid' 
+            @resizing='showSnapGrid'
+            @destroy='removeWidget'>
+    </Widget>
   </div>
 </template>
 
@@ -17,14 +24,8 @@
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/Widget.vue';
 import { Placement } from './components/types'
-import { Grid, Widget as GridWidget } from './lib/grid';
-
-type Coords = {
-  width: number
-  height: number
-  top: number
-  left: number
-}
+import { Grid } from './lib/grid';
+import { Widget as GridWidget } from './lib/widget';
 
 @Options({
   components: {
@@ -35,53 +36,34 @@ export default class App extends Vue {
   rows = 0
   cols = 0
 
-  grid: Grid | null = null
+  grid: Grid  = new Grid(0, 6)
 
   mounted(): void {
-    this.grid = new Grid((this.$refs.gridContainer as HTMLDivElement).clientWidth, 6)
-    this.grid.addWidget(new GridWidget({
-      col: 0,
-      row: 0,
-      width: 2,
-      height: 1
-    }))
-    this.grid.addWidget(new GridWidget({
-      col: 1,
-      row: 3,
-      width: 1,
-      height: 2
-    }))
-    this.setColWidth()
     window.addEventListener("resize", this.setColWidth);
+    this.setColWidth()
+    this.demoSetup()
   }
 
   get widgets(): GridWidget[] {
-    if (!this.grid) return [] as any[]
     return this.grid.widgets
   }
-
 
   setColWidth(): void {
     this.grid!.width = (this.$refs.gridContainer as HTMLDivElement).clientWidth;
   }
 
-  snap(payload: {widget: GridWidget, coords: Coords}): void {
-    let placement = this.grid!.snappedPlacement(payload.widget, payload.coords)
-    payload.widget.placement = placement
+  snapped(): void {
     this.hideSnapGrid();
   }
 
-
-  showSnapGrid(payload: {widget: GridWidget, coords: Coords}): void {
-    if (!this.grid) return
-    let placement = this.grid?.snappedPlacement(payload.widget, payload.coords)
+  showSnapGrid(widget: GridWidget): void {
+    let placement = this.grid.desiredPlacement(widget)
     this.cols = Math.min(6, placement.col + placement.width + 1)
     this.rows = placement.row + placement.height + 1
     this.displayShadow(placement)
   }
 
-  displayShadow(placement: Placement) {
-    if (!this.grid) return
+  displayShadow(placement: Placement): void {
     let ghost = (this.$refs.ghost as HTMLDivElement)
     ghost.style.display = 'block';
     ghost.style.top = Math.max(0, ((placement.row * this.grid.rowHeight) + (placement.row * 20) + 10)) + 'px';
@@ -103,6 +85,21 @@ export default class App extends Vue {
   addNewWidget(): void {
     let widget = new GridWidget({width: 1, height: 1, col: 5, row:1})
     this.grid!.addWidget(widget)
+  }
+
+  demoSetup(): void {
+    this.grid.addWidget(new GridWidget({
+      col: 0,
+      row: 0,
+      width: 2,
+      height: 1
+    }))
+    this.grid.addWidget(new GridWidget({
+      col: 1,
+      row: 3,
+      width: 1,
+      height: 2
+    }))
   }
 }
 </script>
