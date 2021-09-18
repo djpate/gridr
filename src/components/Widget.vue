@@ -5,7 +5,7 @@
         <h1 @mousedown='startDrag'>My Title</h1>
         <span class="close" @click='destroy'>X</span>
       </div>
-      <span>Hello</span>
+      <span>{{ widget.id }} {{ widget.placement }}</span>
     </div>
     <div class='resizer top-left' @mousedown="startResize"></div>
     <div class='resizer top-right' @mousedown="startResize"></div>
@@ -18,7 +18,7 @@
 import { Grid } from '@/lib/grid';
 import { Widget } from '@/lib/widget';
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator'
+import { Prop } from 'vue-property-decorator'
 import { Coords } from './types';
 
 @Options({})
@@ -61,6 +61,7 @@ export default class WidgetComponent extends Vue {
     this.original_offset_x = event.offsetX;
     this.original_offset_y = event.offsetY;
     this.dragging = true
+    this.widget.moving = true
     window.addEventListener('mousemove', this.drag)
     window.addEventListener('mouseup', this.stopDrag)
   }
@@ -80,6 +81,7 @@ export default class WidgetComponent extends Vue {
     event.preventDefault()
     window.removeEventListener('mousemove', this.drag)
     window.removeEventListener('mouseup', this.drag)
+    this.widget.moving = false
     this.grid.snap(this.widget)
     this.$emit('snapped', this.widget)
     this.dragging = false
@@ -94,6 +96,7 @@ export default class WidgetComponent extends Vue {
     this.original_y = this.container().offsetTop;
     this.original_mouse_x = event.pageX;
     this.original_mouse_y = event.pageY;
+    this.widget.moving = true
     window.addEventListener('mousemove', this.resize)
     window.addEventListener('mouseup', this.stopResize)
   }
@@ -104,6 +107,7 @@ export default class WidgetComponent extends Vue {
     window.removeEventListener('mousemove', this.resize)
     window.removeEventListener('mouseup', this.stopResize)
     this.grid.snap(this.widget)
+    this.widget.moving = false
     this.$emit('snapped', this.widget)
   }
 

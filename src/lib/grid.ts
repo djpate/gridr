@@ -64,6 +64,7 @@ export class Grid {
       height: Math.ceil(widget.coords.height / (this.rowHeight + this.rowPadding))
     }
     widget.placement = placement
+    this.handleColisions(widget)
     return placement
   }
 
@@ -82,7 +83,7 @@ export class Grid {
       if (widget.collides(snappedWidget)) {
         const newPlacement = {
           col: widget.placement.col,
-          row: (snappedWidget.placement.row + 1),
+          row: (snappedWidget.placement.row + snappedWidget.placement.height),
           width: widget.placement.width,
           height: widget.placement.height
         }

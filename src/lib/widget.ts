@@ -7,6 +7,7 @@ export class Widget {
   _coords: Coords
 
   placement: Placement
+  moving = false
 
   element?: HTMLDivElement
 
@@ -25,7 +26,8 @@ export class Widget {
   }
 
   collides(anotherWidget: Widget): boolean {
-    if (this.id == anotherWidget.id) return false
+    // you cannot collide with yourself or a moving widget
+    if (this.id == anotherWidget.id || this.moving) return false
     return intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
            intersection(this.placementRanges.row, anotherWidget.placementRanges.row).length > 0
   }
