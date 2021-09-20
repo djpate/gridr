@@ -1,4 +1,5 @@
 import { Coords } from "@/components/types"
+import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
 
@@ -80,19 +81,21 @@ export class Grid {
     this.handleColisions(widget)
   }
 
-  snap(widget: Widget): void {
+  snap(widget: Widget, checkCollisions = true ): void {
     widget.coords = this.constrainedInGrid({
       top: widget.placement.row * this.rowHeight + widget.placement.row * 20,
       left: (widget.placement.col * this.columnWidth) + widget.placement.col * 20,
       width: Math.floor(this.columnWidth * widget.placement.width + (widget.placement.width - 1) * 20),
       height: Math.floor(this.rowHeight * widget.placement.height + (widget.placement.height - 1) * 20),
     })
-    this.handleColisions(widget)
+    if (checkCollisions) this.handleColisions(widget)
   }
 
   handleColisions(snappedWidget: Widget): void {
     this.widgets.forEach((widget) => {
+      console.log('checking', widget.id, 'against', snappedWidget.id)
       if (widget.collides(snappedWidget)) {
+        console.log('collided')
         const newPlacement = new Placement(
           widget.placement.col,
           (snappedWidget.placement.row + snappedWidget.placement.height),
@@ -101,22 +104,14 @@ export class Grid {
         )
         widget.placement = newPlacement
         this.snap(widget)
+      } else {
+        console.log('not collided')
       }
     })
   }
 
-  get gridMap(): {[key: number]: number[]} {
-    const grid: {[key: number]: number[]} = {}
-    this.widgets.forEach((widget) => {
-      const ranges = widget.placementRanges
-      ranges.row.forEach((row) => {
-        grid[row] ??= []
-        ranges.col.forEach((col) => {
-          grid[row][col] = 1
-        })
-      })
-    })
-    return grid
+  get gridMap(): GridMap {
+    return new GridMap(this)
   }
 
   addWidget(widget: Widget): void {
@@ -124,8 +119,39 @@ export class Grid {
     this.snap(widget)
   }
 
+  moveEverythingUp(rowIndex: number): void {
+    if (this.gridMap.rowData(rowIndex).length !== 0) return
+    this.widgets.forEach((widget) => {
+      if (widget.placement.row > rowIndex) {
+        widget.placement.row = Math.max(0, widget.placement.row - 1)
+        this.snap(widget, false)
+      }
+    })
+    this.moveEverythingUp(rowIndex)
+  }
+
   removeWidget(id: string): void {
+    const widgetToRemove = this._widgets[id]
+    const widthRemoved = widgetToRemove.placement.width
+    const colRemoved = widgetToRemove.placement.col
     delete this._widgets[id]
+    const rowData = this.gridMap.rowData(widgetToRemove.placement.row)
+    this.moveEverythingUp(widgetToRemove.placement.row)
+    console.log(rowData)
+    let lastMoved: null | string = null
+    for(let i = 0; i < widthRemoved; i ++) {
+      const cell = rowData[colRemoved + i + 1]
+      if (cell !== undefined && lastMoved !== cell) {
+        lastMoved = cell
+        const widgetToMove = this._widgets[cell]
+        const placement = widgetToMove.placement.clone
+        placement.col = placement.col - widthRemoved
+        if (this.gridMap.canFitWithoutColliding(placement, widgetToMove.id)) {
+          this.updatePlacement(widgetToMove, placement)
+          this.snap(widgetToMove)
+        }
+      }
+    }
   }
 
   setCoords(widget: Widget, coords: Coords): void {

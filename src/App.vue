@@ -4,12 +4,13 @@
   </div>
   <div class="grid" ref='gridContainer'>
     <div class="shadowGrid">
-      <div class="row" v-for='(row, id) in rows' :key='id' >
-        <div class="col" v-for='(col, id) in cols' :key='id'></div>
+      <div class="shadowRow" v-for='(row, id) in rows' :key='id' >
+        <div class="shadowCol" v-for='(col, id) in cols' :key='id'></div>
       </div>
     </div>
     <div class="ghost" ref='ghost'></div>
     <Widget v-for='widget in widgets'
+            :ref='widget.id'
             :grid='grid' 
             :widget='widget' 
             :key='widget.id' 
@@ -21,9 +22,11 @@
 </template>
 
 <script lang="ts">
+import {createVNode, render} from 'vue'
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/Widget.vue';
 import { Grid } from './lib/grid';
+import { GridMap } from './lib/grid_map';
 import { Placement } from './lib/placement';
 import { Widget as GridWidget } from './lib/widget';
 
@@ -71,7 +74,7 @@ export default class App extends Vue {
     let mockWidget = new GridWidget(placement)
     let willCollide = this.grid.widgets.map((widget) => widget.collides(mockWidget)).some(Boolean)
     console.log('collision?', willCollide, placement)
-    let timeout = willCollide ? 500 : 0
+    let timeout = willCollide ? 250 : 0
     this.intentTimeout = setTimeout(() => {
       this.grid.updatePlacement(widget, placement)
     }, timeout)
@@ -80,10 +83,15 @@ export default class App extends Vue {
   displayShadow(placement: Placement): void {
     let ghost = (this.$refs.ghost as HTMLDivElement)
     ghost.style.display = 'block';
-    ghost.style.top = Math.max(0, ((placement.row * this.grid.rowHeight) + (placement.row * 20) + 10)) + 'px';
-    ghost.style.left = ((placement.col * this.grid.columnWidth) + (placement.col * 20) + 10) + 'px';
-    ghost.style.width = (placement.width * this.grid.columnWidth) + (placement.width * 20) - 40 + 'px';
-    ghost.style.height = (placement.height * this.grid.rowHeight) + (placement.height * 20) - 40 + 'px';
+    let ghostPadding = 20;
+    let width = (placement.width * (this.grid.columnWidth + this.grid.columnPadding)) - this.grid.columnPadding - ghostPadding
+    let height = ((placement.height * (this.grid.rowHeight + this.grid.rowPadding)) - this.grid.rowPadding) - ghostPadding
+    let top = Math.max(0, placement.row * (this.grid.rowHeight + this.grid.rowPadding)) + ghostPadding / 2
+    let left = Math.max(0, placement.col * (this.grid.columnWidth + this.grid.columnPadding)) + ghostPadding / 2
+    ghost.style.top = top + 'px'
+    ghost.style.left = left + 'px';
+    ghost.style.width = width + 'px'
+    ghost.style.height = height + 'px'
   }
 
   hideSnapGrid(): void {
@@ -96,14 +104,16 @@ export default class App extends Vue {
     this.grid!.removeWidget(id)
   }
 
-  addNewWidget(): void {
-    let widget = new GridWidget(new Placement(1,1,5,1))
+  addNewWidget(event: MouseEvent): void {
+    let widget = new GridWidget(new Placement(0,0,1,1))
     this.grid!.addWidget(widget)
+    this.grid.handleColisions(widget)
   }
 
   demoSetup(): void {
-    this.grid.addWidget(new GridWidget(new Placement(0, 0, 3, 2), 3, 2))
-    this.grid.addWidget(new GridWidget(new Placement(1, 3, 1, 2)))
+    this.grid.addWidget(new GridWidget(new Placement(0, 0, 1, 1)))
+    this.grid.addWidget(new GridWidget(new Placement(1, 0, 1, 1)))
+    this.grid.addWidget(new GridWidget(new Placement(2, 0, 1, 1)))
   }
 }
 </script>
@@ -145,7 +155,7 @@ body {
       opacity: 0.5;
       display: none;
     }
-    .row {
+    .shadowRow {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
@@ -156,7 +166,7 @@ body {
       &::first-child {
         margin-bottom: 0;
       }
-      .col {
+      .shadowCol {
         display: flex;
         width: calc(calc((100vw - 140px) / 6)); // 20px padding and 5 * 20px margin (last col has no margin)
         height: 100%;

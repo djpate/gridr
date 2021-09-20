@@ -14,4 +14,8 @@ export class Placement {
   sameAs(placement: Placement): boolean {
     return this.col == placement.col && this.row == placement.row && this.width == placement.width && this.height == placement.height
   }
+
+  get clone() {
+    return new Placement(this.col, this.row, this.width, this.height)
+  }
 }
