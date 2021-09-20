@@ -66,6 +66,15 @@ export class Grid {
     )
   }
 
+  placementFromCoords(coords: Coords): Placement {
+    return new Placement(
+      Math.min(this.columns, Math.max(0, Math.floor(coords.left / this.columnWidth))),
+      Math.max(0, Math.floor(coords.top / this.rowHeight)),
+      Math.ceil(coords.width / (this.columnWidth + this.columnPadding)),
+      Math.ceil(coords.height / (this.rowHeight + this.rowPadding))
+    )
+  }
+
   updatePlacement(widget: Widget, placement: Placement): void {
     widget.placement = placement
     this.handleColisions(widget)
@@ -119,10 +128,19 @@ export class Grid {
     delete this._widgets[id]
   }
 
+  setCoords(widget: Widget, coords: Coords): void {
+    const fixed_coords = this.constrainedInGrid(coords)
+    const minHeight = (widget.minHeight * (this.rowHeight + this.rowPadding)) - this.rowPadding
+    const minWidth = (widget.minWidth * (this.columnWidth + this.columnPadding)) - this.columnPadding
+    fixed_coords['width'] = Math.max(fixed_coords.width, minWidth)
+    fixed_coords['height'] = Math.max(fixed_coords.height, minHeight)
+    widget.coords = fixed_coords
+  }
+
   constrainedInGrid(coords: Coords): Coords {
     return {
-      height: coords.height,
-      width: coords.width,
+      height: Math.max(0, coords.height),
+      width: Math.max(0, Math.min(coords.width, (this.columnWidth + this.columnPadding) * this.columns)),
       top: Math.max(0, coords.top),
       left: Math.min(this.width - coords.width, Math.max(0, coords.left))
     }

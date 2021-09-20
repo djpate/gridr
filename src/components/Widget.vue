@@ -73,7 +73,7 @@ export default class WidgetComponent extends Vue {
       top: event.pageY - this.container().parentElement!.offsetTop - this.original_offset_y,
       left: event.pageX - this.original_offset_x
     }
-    this.widget.coords = coords
+    this.grid.setCoords(this.widget, coords)
     this.$emit('resizing', this.widget)
   }
 
@@ -125,7 +125,7 @@ export default class WidgetComponent extends Vue {
       coords = this.topLeft(event)
     if(!coords) return
     
-    this.widget.coords = coords
+    this.grid.setCoords(this.widget, coords)
     this.$emit('resizing', this.widget)
   }
 

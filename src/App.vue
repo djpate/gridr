@@ -102,7 +102,7 @@ export default class App extends Vue {
   }
 
   demoSetup(): void {
-    this.grid.addWidget(new GridWidget(new Placement(0, 0, 2, 1)))
+    this.grid.addWidget(new GridWidget(new Placement(0, 0, 3, 2), 3, 2))
     this.grid.addWidget(new GridWidget(new Placement(1, 3, 1, 2)))
   }
 }

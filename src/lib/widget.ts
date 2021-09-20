@@ -1,5 +1,5 @@
 import { Coords } from "@/components/types"
-import { intersection, range } from "lodash"
+import { intersection, min, range } from "lodash"
 import {v4 as uuid } from 'uuid'
 import { Placement } from "./placement"
 
@@ -10,15 +10,19 @@ export class Widget {
   placement: Placement
   tentativePlacement: Placement | null = null
   moving = false
+  minWidth: number
+  minHeight: number
 
   element?: HTMLDivElement
 
   // unique id to identify the widget
   id: string
 
-  constructor(placement: Placement) {
+  constructor(placement: Placement, minWidth = 1, minHeight = 1) {
     this.id = uuid()
     this.placement = placement
+    this.minWidth = minWidth
+    this.minHeight = minHeight
     this._coords = {
       height: 0,
       width: 0,
