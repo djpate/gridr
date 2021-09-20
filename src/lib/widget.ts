@@ -1,12 +1,14 @@
-import { Coords, Placement } from "@/components/types"
+import { Coords } from "@/components/types"
 import { intersection, range } from "lodash"
 import {v4 as uuid } from 'uuid'
+import { Placement } from "./placement"
 
 export class Widget {
   // used during drag and resize events, not contained to grid
   _coords: Coords
 
   placement: Placement
+  tentativePlacement: Placement | null = null
   moving = false
 
   element?: HTMLDivElement

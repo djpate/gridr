@@ -1,5 +1,5 @@
 <template>
-  <div class="widget_container" ref='container' :class="{ snapped: snapped }">
+  <div class="widget_container" ref='container' :class="{ snapped: snapped, dragging: dragging }">
     <div class="inner">
       <div class="title">
         <h1 @mousedown='startDrag'>My Title</h1>
@@ -184,6 +184,9 @@ export default class WidgetComponent extends Vue {
     transition-property: left, top, height, width;
     transition-duration: .5s;
     z-index: 1;
+  }
+  &.dragging {
+    cursor: grabbing!important;
   }
   .inner {
     padding: 10px;

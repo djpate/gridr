@@ -1,4 +1,5 @@
-import { Coords, Placement } from "@/components/types"
+import { Coords } from "@/components/types"
+import { Placement } from "./placement";
 import { Widget } from "./widget";
 
 // prevents the widget boundaries to leave the allowed grid
@@ -57,15 +58,17 @@ export class Grid {
 
   // return a snapped placement for a given coordinates
   desiredPlacement(widget: Widget): Placement {
-    const placement = {
-      col: Math.floor(widget.coords.left / this.columnWidth),
-      row: Math.floor(widget.coords.top / this.rowHeight),
-      width: Math.ceil(widget.coords.width / (this.columnWidth + this.columnPadding)),
-      height: Math.ceil(widget.coords.height / (this.rowHeight + this.rowPadding))
-    }
+    return new Placement(
+      Math.min(this.columns, Math.max(0, Math.floor(widget.coords.left / this.columnWidth))),
+      Math.max(0, Math.floor(widget.coords.top / this.rowHeight)),
+      Math.ceil(widget.coords.width / (this.columnWidth + this.columnPadding)),
+      Math.ceil(widget.coords.height / (this.rowHeight + this.rowPadding))
+    )
+  }
+
+  updatePlacement(widget: Widget, placement: Placement): void {
     widget.placement = placement
     this.handleColisions(widget)
-    return placement
   }
 
   snap(widget: Widget): void {
@@ -81,31 +84,31 @@ export class Grid {
   handleColisions(snappedWidget: Widget): void {
     this.widgets.forEach((widget) => {
       if (widget.collides(snappedWidget)) {
-        const newPlacement = {
-          col: widget.placement.col,
-          row: (snappedWidget.placement.row + snappedWidget.placement.height),
-          width: widget.placement.width,
-          height: widget.placement.height
-        }
+        const newPlacement = new Placement(
+          widget.placement.col,
+          (snappedWidget.placement.row + snappedWidget.placement.height),
+          widget.placement.width,
+          widget.placement.height
+        )
         widget.placement = newPlacement
         this.snap(widget)
       }
     })
   }
 
-  // moveWidget(widget: Widget, placement: Placement): void {
-  //   widget.placement = placement
-  //   this.widgets.forEach((otherWidget) => {
-  //     if (widget.id !== otherWidget.id && otherWidget.colides(widget)) {
-  //       otherWidget.placement = {
-  //         col: otherWidget.placement.col,
-  //         row: (widget.placement.row + widget.placement.height),
-  //         width: otherWidget.placement.width,
-  //         height: otherWidget.placement.height
-  //       }
-  //     }
-  //   })
-  // }
+  get gridMap(): {[key: number]: number[]} {
+    const grid: {[key: number]: number[]} = {}
+    this.widgets.forEach((widget) => {
+      const ranges = widget.placementRanges
+      ranges.row.forEach((row) => {
+        grid[row] ??= []
+        ranges.col.forEach((col) => {
+          grid[row][col] = 1
+        })
+      })
+    })
+    return grid
+  }
 
   addWidget(widget: Widget): void {
     this._widgets[widget.id] = widget

@@ -23,8 +23,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/Widget.vue';
-import { Placement } from './components/types'
 import { Grid } from './lib/grid';
+import { Placement } from './lib/placement';
 import { Widget as GridWidget } from './lib/widget';
 
 @Options({
@@ -37,6 +37,7 @@ export default class App extends Vue {
   cols = 0
 
   grid: Grid  = new Grid(0, 6)
+  intentTimeout = 0
 
   mounted(): void {
     window.addEventListener("resize", this.setColWidth);
@@ -58,9 +59,22 @@ export default class App extends Vue {
 
   showSnapGrid(widget: GridWidget): void {
     let placement = this.grid.desiredPlacement(widget)
+    if (widget.tentativePlacement?.sameAs(placement)) return 
+    clearTimeout(this.intentTimeout)
+    widget.tentativePlacement = placement
     this.cols = Math.min(6, placement.col + placement.width + 1)
     this.rows = placement.row + placement.height + 1
     this.displayShadow(placement)
+    
+
+    // try to be smart about when to move other widgets when collision will occur
+    let mockWidget = new GridWidget(placement)
+    let willCollide = this.grid.widgets.map((widget) => widget.collides(mockWidget)).some(Boolean)
+    console.log('collision?', willCollide, placement)
+    let timeout = willCollide ? 500 : 0
+    this.intentTimeout = setTimeout(() => {
+      this.grid.updatePlacement(widget, placement)
+    }, timeout)
   }
 
   displayShadow(placement: Placement): void {
@@ -83,23 +97,13 @@ export default class App extends Vue {
   }
 
   addNewWidget(): void {
-    let widget = new GridWidget({width: 1, height: 1, col: 5, row:1})
+    let widget = new GridWidget(new Placement(1,1,5,1))
     this.grid!.addWidget(widget)
   }
 
   demoSetup(): void {
-    this.grid.addWidget(new GridWidget({
-      col: 0,
-      row: 0,
-      width: 2,
-      height: 1
-    }))
-    this.grid.addWidget(new GridWidget({
-      col: 1,
-      row: 3,
-      width: 1,
-      height: 2
-    }))
+    this.grid.addWidget(new GridWidget(new Placement(0, 0, 2, 1)))
+    this.grid.addWidget(new GridWidget(new Placement(1, 3, 1, 2)))
   }
 }
 </script>
