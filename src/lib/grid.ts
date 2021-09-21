@@ -93,9 +93,7 @@ export class Grid {
 
   handleColisions(snappedWidget: Widget): void {
     this.widgets.forEach((widget) => {
-      console.log('checking', widget.id, 'against', snappedWidget.id)
       if (widget.collides(snappedWidget)) {
-        console.log('collided')
         const newPlacement = new Placement(
           widget.placement.col,
           (snappedWidget.placement.row + snappedWidget.placement.height),
@@ -104,8 +102,6 @@ export class Grid {
         )
         widget.placement = newPlacement
         this.snap(widget)
-      } else {
-        console.log('not collided')
       }
     })
   }
@@ -120,7 +116,8 @@ export class Grid {
   }
 
   moveEverythingUp(rowIndex: number): void {
-    if (this.gridMap.rowData(rowIndex).length !== 0) return
+    console.log(rowIndex, this.gridMap.lastRow)
+    if (this.gridMap.rowData(rowIndex).length !== 0 || rowIndex > this.gridMap.lastRow) return
     this.widgets.forEach((widget) => {
       if (widget.placement.row > rowIndex) {
         widget.placement.row = Math.max(0, widget.placement.row - 1)

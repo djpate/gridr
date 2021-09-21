@@ -105,7 +105,8 @@ export default class App extends Vue {
   }
 
   addNewWidget(event: MouseEvent): void {
-    let widget = new GridWidget(new Placement(0,0,1,1))
+    let placement = this.grid.gridMap.firstFreeSpot(1,1)
+    let widget = new GridWidget(placement)
     this.grid!.addWidget(widget)
     this.grid.handleColisions(widget)
   }

@@ -55,7 +55,6 @@ export default class WidgetComponent extends Vue {
   }
 
   startDrag(event: MouseEvent): void {
-    console.log('startDrag')
     event.preventDefault()
     this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
     this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
