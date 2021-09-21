@@ -1,4 +1,5 @@
 import { Coords } from "@/components/types"
+import { uniqueId } from "lodash";
 import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
@@ -57,6 +58,10 @@ export class Grid {
     return Object.values(this._widgets)
   }
 
+  widget(id: string): Widget {
+    return this._widgets[id]
+  }
+
   // return a snapped placement for a given coordinates
   desiredPlacement(widget: Widget): Placement {
     return new Placement(
@@ -112,11 +117,11 @@ export class Grid {
 
   addWidget(widget: Widget): void {
     this._widgets[widget.id] = widget
-    this.snap(widget)
+    console.log('adding', widget.id, 'to', this.gridMap.map)
+    this.snap(widget, false)
   }
 
   moveEverythingUp(rowIndex: number): void {
-    console.log(rowIndex, this.gridMap.lastRow)
     if (this.gridMap.rowData(rowIndex).length !== 0 || rowIndex > this.gridMap.lastRow) return
     this.widgets.forEach((widget) => {
       if (widget.placement.row > rowIndex) {
@@ -129,26 +134,23 @@ export class Grid {
 
   removeWidget(id: string): void {
     const widgetToRemove = this._widgets[id]
-    const widthRemoved = widgetToRemove.placement.width
-    const colRemoved = widgetToRemove.placement.col
     delete this._widgets[id]
     const rowData = this.gridMap.rowData(widgetToRemove.placement.row)
+    
+    // if current row is now empty, move everything below it up
     this.moveEverythingUp(widgetToRemove.placement.row)
-    console.log(rowData)
-    let lastMoved: null | string = null
-    for(let i = 0; i < widthRemoved; i ++) {
-      const cell = rowData[colRemoved + i + 1]
-      if (cell !== undefined && lastMoved !== cell) {
-        lastMoved = cell
-        const widgetToMove = this._widgets[cell]
-        const placement = widgetToMove.placement.clone
-        placement.col = placement.col - widthRemoved
-        if (this.gridMap.canFitWithoutColliding(placement, widgetToMove.id)) {
-          this.updatePlacement(widgetToMove, placement)
-          this.snap(widgetToMove)
-        }
+
+    // now let's try to move content on the same row the left
+    const widgetsToMove = [...new Set(rowData.slice(widgetToRemove.placement.col + widgetToRemove.placement.width))].map((widgetId) => this.widget(widgetId))
+    widgetsToMove.forEach((widget) => {
+      const tentativePlacement = widget.placement.clone
+      tentativePlacement.col = tentativePlacement.col - widgetToRemove.placement.width
+      if (this.gridMap.canFitWithoutColliding(tentativePlacement, uniqueId())) {
+        widget.placement = tentativePlacement
+        this.snap(widget)
       }
-    }
+    })
+
   }
 
   setCoords(widget: Widget, coords: Coords): void {

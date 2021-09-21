@@ -19,7 +19,7 @@ export class GridMap {
     let row = 0
     let placement: Placement
     while(found === false) {
-      for(let col = 0; col < this.grid.columns; col++) {
+      for(let col = 0; col < (this.grid.columns - width); col++) {
         placement = new Placement(col, row, width, height)
         if (this.canFitWithoutColliding(placement, uuid())) {
           found = true

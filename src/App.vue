@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts">
+import { random } from 'lodash';
 import {createVNode, render} from 'vue'
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/Widget.vue';
@@ -104,17 +105,19 @@ export default class App extends Vue {
     this.grid!.removeWidget(id)
   }
 
-  addNewWidget(event: MouseEvent): void {
-    let placement = this.grid.gridMap.firstFreeSpot(1,1)
+  addNewWidget(): void {
+    const width = random(1, 5)
+    const height = random(1, 4)
+    let placement = this.grid.gridMap.firstFreeSpot(width, height)
     let widget = new GridWidget(placement)
     this.grid!.addWidget(widget)
-    this.grid.handleColisions(widget)
   }
 
   demoSetup(): void {
-    this.grid.addWidget(new GridWidget(new Placement(0, 0, 1, 1)))
-    this.grid.addWidget(new GridWidget(new Placement(1, 0, 1, 1)))
-    this.grid.addWidget(new GridWidget(new Placement(2, 0, 1, 1)))
+    this.addNewWidget()
+    this.addNewWidget()
+    this.addNewWidget()
+    this.addNewWidget()
   }
 }
 </script>

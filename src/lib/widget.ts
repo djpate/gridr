@@ -34,8 +34,10 @@ export class Widget {
   collides(anotherWidget: Widget): boolean {
     // you cannot collide with yourself or a moving widget
     if (this.id == anotherWidget.id || this.moving) return false
-    return intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
+    const collides =  intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
            intersection(this.placementRanges.row, anotherWidget.placementRanges.row).length > 0
+    console.log('checking ', this.id, 'against', anotherWidget.id, '->', collides)
+    return collides
   }
 
   set coords(coords: Coords) {
