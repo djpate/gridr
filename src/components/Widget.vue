@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="widget_container" ref='container' :class="{ snapped: snapped, dragging: dragging }">
     <div class="inner">
       <div class="title">
@@ -6,6 +6,8 @@
         <span class="close" @click='destroy'>X</span>
       </div>
       <span>{{ widget.id }} {{ widget.placement }}</span>
+      <p>{{ widget.moved }}</p>
+      <p>{{ widget.reflowed }}</p>
     </div>
     <div class='resizer top-left' @mousedown="startResize"></div>
     <div class='resizer top-right' @mousedown="startResize"></div>
@@ -42,128 +44,128 @@ export default class WidgetComponent extends Vue {
     this.grid.snap(this.widget)
   }
 
-  get resizing(): boolean {
-    return !!this.currentDragger
-  }
+  // get resizing(): boolean {
+  //   return !!this.currentDragger
+  // }
 
-  get snapped(): boolean {
-    return !this.resizing && !this.dragging
-  }
+  // get snapped(): boolean {
+  //   return !this.resizing && !this.dragging
+  // }
 
-  container(): HTMLDivElement {
-    return this.$refs.container as HTMLDivElement
-  }
+  // container(): HTMLDivElement {
+  //   return this.$refs.container as HTMLDivElement
+  // }
 
-  startDrag(event: MouseEvent): void {
-    event.preventDefault()
-    this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
-    this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
-    this.original_offset_x = event.offsetX;
-    this.original_offset_y = event.offsetY;
-    this.dragging = true
-    this.widget.moving = true
-    window.addEventListener('mousemove', this.drag)
-    window.addEventListener('mouseup', this.stopDrag)
-  }
+  // startDrag(event: MouseEvent): void {
+  //   event.preventDefault()
+  //   this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
+  //   this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
+  //   this.original_offset_x = event.offsetX;
+  //   this.original_offset_y = event.offsetY;
+  //   this.dragging = true
+  //   this.widget.moving = true
+  //   window.addEventListener('mousemove', this.drag)
+  //   window.addEventListener('mouseup', this.stopDrag)
+  // }
 
-  drag(event: MouseEvent): void  {
-    let coords = {
-      width: this.original_width,
-      height: this.original_height,
-      top: event.pageY - this.container().parentElement!.offsetTop - this.original_offset_y,
-      left: event.pageX - this.original_offset_x
-    }
-    this.grid.setCoords(this.widget, coords)
-    this.$emit('resizing', this.widget)
-  }
+  // drag(event: MouseEvent): void  {
+  //   let coords = {
+  //     width: this.original_width,
+  //     height: this.original_height,
+  //     top: event.pageY - this.container().parentElement!.offsetTop - this.original_offset_y,
+  //     left: event.pageX - this.original_offset_x
+  //   }
+  //   this.grid.setCoords(this.widget, coords)
+  //   this.$emit('resizing', this.widget)
+  // }
 
-  stopDrag(event: MouseEvent): void  {
-    event.preventDefault()
-    window.removeEventListener('mousemove', this.drag)
-    window.removeEventListener('mouseup', this.stopDrag)
-    this.widget.moving = false
-    this.grid.snap(this.widget)
-    this.$emit('snapped', this.widget)
-    this.dragging = false
-  }
+  // stopDrag(event: MouseEvent): void  {
+  //   event.preventDefault()
+  //   window.removeEventListener('mousemove', this.drag)
+  //   window.removeEventListener('mouseup', this.stopDrag)
+  //   this.widget.moving = false
+  //   this.grid.snap(this.widget)
+  //   this.$emit('snapped', this.widget)
+  //   this.dragging = false
+  // }
 
-  startResize(event: MouseEvent): void  {
-    event.preventDefault()
-    this.currentDragger = event.target as HTMLElement;
-    this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
-    this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
-    this.original_x = this.container().offsetLeft;
-    this.original_y = this.container().offsetTop;
-    this.original_mouse_x = event.pageX;
-    this.original_mouse_y = event.pageY;
-    this.widget.moving = true
-    window.addEventListener('mousemove', this.resize)
-    window.addEventListener('mouseup', this.stopResize)
-  }
+  // startResize(event: MouseEvent): void  {
+  //   event.preventDefault()
+  //   this.currentDragger = event.target as HTMLElement;
+  //   this.original_width = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('width').replace('px', ''));
+  //   this.original_height = parseFloat(getComputedStyle(this.container(), null).getPropertyValue('height').replace('px', ''));
+  //   this.original_x = this.container().offsetLeft;
+  //   this.original_y = this.container().offsetTop;
+  //   this.original_mouse_x = event.pageX;
+  //   this.original_mouse_y = event.pageY;
+  //   this.widget.moving = true
+  //   window.addEventListener('mousemove', this.resize)
+  //   window.addEventListener('mouseup', this.stopResize)
+  // }
 
-  stopResize(event: MouseEvent): void  {
-    event.preventDefault()
-    this.currentDragger = null
-    window.removeEventListener('mousemove', this.resize)
-    window.removeEventListener('mouseup', this.stopResize)
-    this.grid.snap(this.widget)
-    this.widget.moving = false
-    this.$emit('snapped', this.widget)
-  }
+  // stopResize(event: MouseEvent): void  {
+  //   event.preventDefault()
+  //   this.currentDragger = null
+  //   window.removeEventListener('mousemove', this.resize)
+  //   window.removeEventListener('mouseup', this.stopResize)
+  //   this.grid.snap(this.widget)
+  //   this.widget.moving = false
+  //   this.$emit('snapped', this.widget)
+  // }
 
-  resize(event: MouseEvent): void  {
-    if (!this.currentDragger) return
-    let coords: Coords | null
-    let classList = this.currentDragger.classList
-    if (classList.contains('bottom-left'))
-      coords = this.bottomLeft(event)
-    else if (classList.contains('bottom-right'))
-      coords = this.bottomRight(event)
-    else if (classList.contains('top-right'))
-      coords = this.topRight(event)
-    else
-      coords = this.topLeft(event)
-    if(!coords) return
+  // resize(event: MouseEvent): void  {
+  //   if (!this.currentDragger) return
+  //   let coords: Coords | null
+  //   let classList = this.currentDragger.classList
+  //   if (classList.contains('bottom-left'))
+  //     coords = this.bottomLeft(event)
+  //   else if (classList.contains('bottom-right'))
+  //     coords = this.bottomRight(event)
+  //   else if (classList.contains('top-right'))
+  //     coords = this.topRight(event)
+  //   else
+  //     coords = this.topLeft(event)
+  //   if(!coords) return
     
-    this.grid.setCoords(this.widget, coords)
-    this.$emit('resizing', this.widget)
-  }
+  //   this.grid.setCoords(this.widget, coords)
+  //   this.$emit('resizing', this.widget)
+  // }
 
-  bottomRight(event: MouseEvent): Coords {
-    return {
-      width: this.original_width + (event.pageX - this.original_mouse_x),
-      height: this.original_height + (event.pageY - this.original_mouse_y),
-      top: this.container().offsetTop,
-      left: this.container().offsetLeft
-    }
-  }
+  // bottomRight(event: MouseEvent): Coords {
+  //   return {
+  //     width: this.original_width + (event.pageX - this.original_mouse_x),
+  //     height: this.original_height + (event.pageY - this.original_mouse_y),
+  //     top: this.container().offsetTop,
+  //     left: this.container().offsetLeft
+  //   }
+  // }
 
-  bottomLeft(event: MouseEvent): Coords {
-    return {
-      width: this.original_width - (event.pageX - this.original_mouse_x),
-      height: this.original_height + (event.pageY - this.original_mouse_y),
-      top: this.container().offsetTop,
-      left: this.original_x + (event.pageX - this.original_mouse_x)
-    }
-  }
+  // bottomLeft(event: MouseEvent): Coords {
+  //   return {
+  //     width: this.original_width - (event.pageX - this.original_mouse_x),
+  //     height: this.original_height + (event.pageY - this.original_mouse_y),
+  //     top: this.container().offsetTop,
+  //     left: this.original_x + (event.pageX - this.original_mouse_x)
+  //   }
+  // }
 
-  topRight(event: MouseEvent) : Coords {
-    return {
-      width: this.original_width + (event.pageX - this.original_mouse_x),
-      height: this.original_height - (event.pageY - this.original_mouse_y),
-      top: this.original_y + (event.pageY - this.original_mouse_y),
-      left: this.container().offsetLeft
-    }
-  }
+  // topRight(event: MouseEvent) : Coords {
+  //   return {
+  //     width: this.original_width + (event.pageX - this.original_mouse_x),
+  //     height: this.original_height - (event.pageY - this.original_mouse_y),
+  //     top: this.original_y + (event.pageY - this.original_mouse_y),
+  //     left: this.container().offsetLeft
+  //   }
+  // }
 
-  topLeft(event: MouseEvent) : Coords {
-    return {
-      width: this.original_width - (event.pageX - this.original_mouse_x),
-      height: this.original_height - (event.pageY - this.original_mouse_y),
-      top:  this.original_y + (event.pageY - this.original_mouse_y),
-      left: this.original_x + (event.pageX - this.original_mouse_x)
-    }
-  }
+  // topLeft(event: MouseEvent) : Coords {
+  //   return {
+  //     width: this.original_width - (event.pageX - this.original_mouse_x),
+  //     height: this.original_height - (event.pageY - this.original_mouse_y),
+  //     top:  this.original_y + (event.pageY - this.original_mouse_y),
+  //     left: this.original_x + (event.pageX - this.original_mouse_x)
+  //   }
+  // }
 
   destroy(): void {
     this.$emit('destroy', this.widget.id)
@@ -245,4 +247,4 @@ export default class WidgetComponent extends Vue {
   }
 }
 
-</style>
+</style> -->

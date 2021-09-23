@@ -1,21 +1,23 @@
+import clone from 'lodash/clone'
 export class Placement {
-  col: number
-  row: number
-  width: number
-  height: number
+  startCol: number
+  endCol: number
+  startRow: number
+  endRow: number
 
-  constructor(col: number, row: number, width: number, height: number) {
-    this.col = col
-    this.row = row
-    this.width = width
-    this.height = height
+  constructor(startCol: number, endCol: number, startRow: number, endRow: number) {
+    this.startCol = startCol
+    this.endCol = endCol
+    this.startRow = startRow
+    this.endRow = endRow
   }
 
-  sameAs(placement: Placement): boolean {
-    return this.col == placement.col && this.row == placement.row && this.width == placement.width && this.height == placement.height
+  get width() {
+    return this.endCol - this.startCol
   }
 
-  get clone() {
-    return new Placement(this.col, this.row, this.width, this.height)
+  get height() {
+    return this.endRow - this.startRow
   }
+
 }

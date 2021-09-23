@@ -2,32 +2,16 @@
   <div class="add">
     <div class="new" @mousedown='addNewWidget'>Some widget</div>
   </div>
-  <div class="grid" ref='gridContainer'>
-    <div class="shadowGrid">
-      <div class="shadowRow" v-for='(row, id) in rows' :key='id' >
-        <div class="shadowCol" v-for='(col, id) in cols' :key='id'></div>
-      </div>
-    </div>
-    <div class="ghost" ref='ghost'></div>
-    <Widget v-for='widget in widgets'
-            :ref='widget.id'
-            :grid='grid' 
-            :widget='widget' 
-            :key='widget.id' 
-            @snapped='hideSnapGrid' 
-            @resizing='showSnapGrid'
-            @destroy='removeWidget'>
-    </Widget>
+  <div id="grid">
+    <Widget class="widget" v-for='widget in widgets' :id='widget' :key='widget'></Widget>
   </div>
 </template>
 
 <script lang="ts">
-import { random } from 'lodash';
-import {createVNode, render} from 'vue'
+import { random, uniqueId } from 'lodash';
 import { Options, Vue } from 'vue-class-component';
-import Widget from './components/Widget.vue';
+import Widget from './components/PlainWidget.vue';
 import { Grid } from './lib/grid';
-import { GridMap } from './lib/grid_map';
 import { Placement } from './lib/placement';
 import { Widget as GridWidget } from './lib/widget';
 
@@ -40,85 +24,78 @@ export default class App extends Vue {
   rows = 0
   cols = 0
 
-  grid: Grid  = new Grid(0, 6)
+  widgets = ['foo']
+
+  grid!: Grid
   intentTimeout = 0
 
   mounted(): void {
-    window.addEventListener("resize", this.setColWidth);
-    this.setColWidth()
-    this.demoSetup()
-  }
-
-  get widgets(): GridWidget[] {
-    return this.grid.widgets
-  }
-
-  setColWidth(): void {
-    this.grid!.width = (this.$refs.gridContainer as HTMLDivElement).clientWidth;
+    this.grid = new Grid('grid', 6)
+    // this.demoSetup()
   }
 
   snapped(): void {
-    this.hideSnapGrid();
-  }
-
-  showSnapGrid(widget: GridWidget): void {
-    let placement = this.grid.desiredPlacement(widget)
-    if (widget.tentativePlacement?.sameAs(placement)) return 
-    clearTimeout(this.intentTimeout)
-    widget.tentativePlacement = placement
-    this.cols = Math.min(6, placement.col + placement.width + 1)
-    this.rows = placement.row + placement.height + 1
-    this.displayShadow(placement)
-    
-
-    // try to be smart about when to move other widgets when collision will occur
-    let mockWidget = new GridWidget(placement)
-    let willCollide = this.grid.widgets.map((widget) => widget.collides(mockWidget)).some(Boolean)
-    console.log('collision?', willCollide, placement)
-    let timeout = willCollide ? 250 : 0
-    this.intentTimeout = setTimeout(() => {
-      this.grid.updatePlacement(widget, placement)
-    }, timeout)
-  }
-
-  displayShadow(placement: Placement): void {
-    let ghost = (this.$refs.ghost as HTMLDivElement)
-    ghost.style.display = 'block';
-    let ghostPadding = 20;
-    let width = (placement.width * (this.grid.columnWidth + this.grid.columnPadding)) - this.grid.columnPadding - ghostPadding
-    let height = ((placement.height * (this.grid.rowHeight + this.grid.rowPadding)) - this.grid.rowPadding) - ghostPadding
-    let top = Math.max(0, placement.row * (this.grid.rowHeight + this.grid.rowPadding)) + ghostPadding / 2
-    let left = Math.max(0, placement.col * (this.grid.columnWidth + this.grid.columnPadding)) + ghostPadding / 2
-    ghost.style.top = top + 'px'
-    ghost.style.left = left + 'px';
-    ghost.style.width = width + 'px'
-    ghost.style.height = height + 'px'
-  }
-
-  hideSnapGrid(): void {
-    this.rows = 0;
-    this.cols = 0;
-    (this.$refs.ghost as HTMLDivElement).style.display = 'none';
-  }
-
-  removeWidget(id: string): void {
-    this.grid!.removeWidget(id)
+    // this.hideSnapGrid();
   }
 
   addNewWidget(): void {
-    const width = random(1, 5)
-    const height = random(1, 4)
-    let placement = this.grid.gridMap.firstFreeSpot(width, height)
-    let widget = new GridWidget(placement)
-    this.grid!.addWidget(widget)
+    this.widgets.push(uniqueId())
   }
 
-  demoSetup(): void {
-    this.addNewWidget()
-    this.addNewWidget()
-    this.addNewWidget()
-    this.addNewWidget()
-  }
+  // showSnapGrid(widget: GridWidget): void {
+  //   let placement = this.grid.desiredPlacement(widget)
+  //   clearTimeout(this.intentTimeout)
+  //   this.cols = Math.min(6, placement.col + placement.width + 1)
+  //   this.rows = placement.row + placement.height + 1
+  //   this.displayShadow(placement)
+    
+
+  //   // try to be smart about when to move other widgets when collision will occur
+  //   let mockWidget = new GridWidget(placement)
+  //   let willCollide = this.grid.widgets.map((widget) => widget.collides(mockWidget)).some(Boolean)
+  //   // console.log('collision?', willCollide, placement)
+  //   let timeout = willCollide ? 125 : 0
+  //   this.intentTimeout = setTimeout(() => {
+  //     this.grid.updatePlacement(widget, placement)
+  //   }, timeout)
+  // }
+
+  // displayShadow(placement: Placement): void {
+  //   let ghost = (this.$refs.ghost as HTMLDivElement)
+  //   ghost.style.display = 'block';
+  //   let ghostPadding = 20;
+  //   let width = (placement.width * (this.grid.columnWidth + this.grid.columnPadding)) - this.grid.columnPadding - ghostPadding
+  //   let height = ((placement.height * (this.grid.rowHeight + this.grid.rowPadding)) - this.grid.rowPadding) - ghostPadding
+  //   let top = Math.max(0, placement.row * (this.grid.rowHeight + this.grid.rowPadding)) + ghostPadding / 2
+  //   let left = Math.max(0, placement.col * (this.grid.columnWidth + this.grid.columnPadding)) + ghostPadding / 2
+  //   ghost.style.top = top + 'px'
+  //   ghost.style.left = left + 'px';
+  //   ghost.style.width = width + 'px'
+  //   ghost.style.height = height + 'px'
+  // }
+
+  // hideSnapGrid(): void {
+  //   this.rows = 0;
+  //   this.cols = 0;
+  //   (this.$refs.ghost as HTMLDivElement).style.display = 'none';
+  // }
+
+  // removeWidget(id: string): void {
+  //   this.grid!.removeWidget(id)
+  // }
+
+  // addNewWidget(): void {
+  //   const width = random(1, 2)
+  //   const height = random(1, 2)
+  //   let placement = this.grid.gridMap.firstFreeSpot(width, height)
+  //   let widget = new GridWidget(placement)
+  //   this.grid!.addWidget(widget)
+  // }
+
+  // demoSetup(): void {
+  //   this.addNewWidget()
+  //   this.addNewWidget()
+  // }
 }
 </script>
 
@@ -148,41 +125,92 @@ body {
     .shadowGrid {
       width: fit-content;
     }
-    .ghost {
-      top: 0;
-      left: 0;
-      background-color: #d6d6ff;
-      width: 50px;
-      height: 50px;
-      border-radius: 15px;
-      position: absolute;
-      opacity: 0.5;
-      display: none;
+  }
+
+.grid_root {
+  margin: 20px;
+  position: relative;
+  .shadowRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 150px;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
+    &::first-child {
+      margin-bottom: 0;
     }
-    .shadowRow {
+    .shadowCol {
       display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      width: 100%;
-      height: 150px;
-      justify-content: space-evenly;
-      margin-bottom: 20px;
-      &::first-child {
-        margin-bottom: 0;
-      }
-      .shadowCol {
-        display: flex;
-        width: calc(calc((100vw - 140px) / 6)); // 20px padding and 5 * 20px margin (last col has no margin)
-        height: 100%;
-        border: 1px dashed blue;
-        box-sizing: border-box;
-        margin-right: 20px;
-        &:last-child {
-          margin-right: 0;
-        }
+      width: calc(calc((100vw - 140px) / 6)); // 20px padding and 5 * 20px margin (last col has no margin)
+      height: 100%;
+      border: 1px dashed blue;
+      box-sizing: border-box;
+      margin-right: 20px;
+      &:last-child {
+        margin-right: 0;
       }
     }
   }
+  .widget_container {
+    border: 1px solid grey;
+    filter: drop-shadow(5px 5px 2px #e1e1e1);
+    background-color: white;
+    &.snapped {
+      transition-property: width, height, top, left;
+      transition-duration: .5s;
+    }
+    &.moving {
+      opacity: 0.9;
+      pointer-events: none;
+    }
+    z-index: 3;
+    .resizer{
+      display: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%; /*magic to turn square into circle*/
+      background: white;
+      border: 3px solid #4286f4;
+      position: absolute;
+      &.top-left {
+        left: -5px;
+        top: -5px;
+        cursor: nwse-resize; /*resizer cursor*/
+      }
+      &.top-right {
+        right: -5px;
+        top: -5px;
+        cursor: nesw-resize;
+      }
+      &.bottom-left {
+        left: -5px;
+        bottom: -5px;
+        cursor: nesw-resize;
+      }
+      &.bottom-right {
+        right: -5px;
+        bottom: -5px;
+        cursor: nwse-resize;
+      }
+    }
+    &:hover {
+      .resizer {
+        display: block;
+      }
+    }
+
+    .dragger {
+      border: 1px solid black;
+      height: 20px;
+      width: 20px;
+      position: absolute;
+      bottom: 0;
+      right: 20;
+    }
+  }
+}
 }
 
 </style>

@@ -1,62 +1,135 @@
 import { Coords } from "@/components/types"
-import { intersection, min, range } from "lodash"
-import {v4 as uuid } from 'uuid'
+import { uniqueId, wrap } from "lodash"
+import { draggable } from "./decorators/draggable"
+import { resizable } from "./decorators/resizable"
+import { Grid } from "./grid"
 import { Placement } from "./placement"
 
 export class Widget {
   // used during drag and resize events, not contained to grid
-  _coords: Coords
+  _coords: Coords = {
+    height: 0,
+    width: 0,
+    top: 0,
+    left: 0
+  }
 
-  placement: Placement
-  tentativePlacement: Placement | null = null
-  moving = false
-  minWidth: number
-  minHeight: number
+  // placement: Placement
+  originalPlacement: Placement | null = null
+  _moving = false
+  _reflowed = false
+  minWidth = 1
+  minHeight = 1
+  moved: Widget[] = []
 
-  element?: HTMLDivElement
+  element: HTMLDivElement
 
   // unique id to identify the widget
   id: string
 
-  constructor(placement: Placement, minWidth = 1, minHeight = 1) {
-    this.id = uuid()
-    this.placement = placement
-    this.minWidth = minWidth
-    this.minHeight = minHeight
-    this._coords = {
-      height: 0,
-      width: 0,
-      top: 0,
-      left: 0
+  listeners: {[key: string]: any} = {}
+  placement: Placement
+  grid: Grid
+
+  constructor(element: HTMLDivElement, grid: Grid) {
+    this.grid = grid
+    this.element = element
+    this.id = element.id || uniqueId();
+    this.placement = new Placement(0, 1, 0, 1)
+    this.setupWidgetWrapper()
+    resizable(this)
+    // draggable(this)
+  }
+
+  setupWidgetWrapper(): void {
+    const wrapped = document.createElement('div')
+    wrapped.appendChild(this.element)
+    wrapped.id = `widget_container_${this.id}`
+    wrapped.classList.add('widget_container')
+    this.element = wrapped
+
+    this.grid.rootElement.appendChild(wrapped)
+  }
+
+  snap() {
+    this.moving = false
+    const placement = this.grid.placement(this.element.getBoundingClientRect())
+    const top = placement.startRow * this.grid.rowHeight + placement.startRow * 20
+    const left = (placement.startCol * this.grid.columnWidth) + placement.startCol * 20
+    const width = Math.floor(this.grid.columnWidth * placement.width + (placement.width - 1) * 20)
+    const height = Math.floor(this.grid.rowHeight * placement.height + (placement.height - 1) * 20)
+    this.element.style.width = `${width}px`
+    this.element.style.height = `${height}px`
+    this.element.style.left = `${left}px`
+    this.element.style.top = `${top}px`
+  }
+
+  set moving(state: boolean) {
+    if (state) {
+      this.element.classList.remove('snapped')
+      this.element.classList.add('moving')
+    } else {
+      this.element.classList.remove('moving')
+      this.element.classList.add('snapped')
+      this.grid.clearGhost()
     }
+    this._moving = state
   }
 
-  collides(anotherWidget: Widget): boolean {
-    // you cannot collide with yourself or a moving widget
-    if (this.id == anotherWidget.id || this.moving) return false
-    const collides =  intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
-           intersection(this.placementRanges.row, anotherWidget.placementRanges.row).length > 0
-    console.log('checking ', this.id, 'against', anotherWidget.id, '->', collides)
-    return collides
-  }
+  // collides(anotherWidget: Widget): boolean {
+  //   // you cannot collide with yourself or a moving widget
+  //   if (this.id == anotherWidget.id || this.moving) return false
+  //   const collides =  intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
+  //          intersection(this.placementRanges.row, anotherWidget.placementRanges.row).length > 0
+  //   return collides
+  // }
 
-  set coords(coords: Coords) {
-    this._coords = coords
-    if (!this.element) return
-    this.element.style.height = this._coords.height + 'px'
-    this.element.style.width = this._coords.width + 'px'
-    this.element.style.top = this._coords.top + 'px'
-    this.element.style.left = this._coords.left + 'px'
-  }
+  // set coords(coords: Coords) {
+  //   this._coords = coords
+  //   if (!this.element) return
+  //   this.element.style.height = this._coords.height + 'px'
+  //   this.element.style.width = this._coords.width + 'px'
+  //   this.element.style.top = this._coords.top + 'px'
+  //   this.element.style.left = this._coords.left + 'px'
+  // }
 
-  get coords(): Coords {
-    return this._coords
-  }
+  // get coords(): Coords {
+  //   return this._coords
+  // }
 
-  get placementRanges() : {col: number[], row: number[]} {
-    return {
-      col: range(this.placement.col, this.placement.col + this.placement.width),
-      row: range(this.placement.row, this.placement.row + this.placement.height)
-    }
-  }
+  // get moving(): boolean {
+  //   return this._moving
+  // }
+
+  // set moving(state: boolean) {
+  //   if (state) {
+  //     this.originalPlacement = this.placement.clone
+  //   } else {
+  //     console.log('moved', this.moved.length)
+  //     console.log('stopped moving')
+  //     this.moved = []
+  //     this.originalPlacement = null
+  //   }
+  //   this._moving = state
+  // }
+
+  // get reflowed(): boolean {
+  //   return this._reflowed
+  // }
+
+  // set reflowed(state: boolean) {
+  //   console.log(this.id, 'was marked as reflowed')
+  //   if (state) {
+  //     console.log(this.placement.clone)
+  //     this.originalPlacement = this.placement.clone
+  //   }
+  //   this._reflowed = state
+  // }
+
+  // get placementRanges() : {col: number[], row: number[]} {
+  //   return {
+  //     col: range(this.placement.col, this.placement.col + this.placement.width),
+  //     row: range(this.placement.row, this.placement.row + this.placement.height)
+  //   }
+  // }
 }
