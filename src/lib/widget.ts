@@ -38,7 +38,8 @@ export class Widget {
     this.placement = new Placement(0, 1, 0, 1)
     this.setupWidgetWrapper()
     resizable(this)
-    // draggable(this)
+    draggable(this)
+    this.snap()
   }
 
   setupWidgetWrapper(): void {
@@ -52,16 +53,13 @@ export class Widget {
   }
 
   snap() {
-    this.moving = false
     const placement = this.grid.placement(this.element.getBoundingClientRect())
-    const top = placement.startRow * this.grid.rowHeight + placement.startRow * 20
-    const left = (placement.startCol * this.grid.columnWidth) + placement.startCol * 20
-    const width = Math.floor(this.grid.columnWidth * placement.width + (placement.width - 1) * 20)
-    const height = Math.floor(this.grid.rowHeight * placement.height + (placement.height - 1) * 20)
-    this.element.style.width = `${width}px`
-    this.element.style.height = `${height}px`
-    this.element.style.left = `${left}px`
-    this.element.style.top = `${top}px`
+    this.applyCoords({
+      top: placement.startRow * this.grid.rowHeight + placement.startRow * 20,
+      left: (placement.startCol * this.grid.columnWidth) + placement.startCol * 20,
+      width: Math.floor(this.grid.columnWidth * placement.width + (placement.width - 1) * 20),
+      height: Math.floor(this.grid.rowHeight * placement.height + (placement.height - 1) * 20)
+    })
   }
 
   set moving(state: boolean) {
@@ -72,10 +70,18 @@ export class Widget {
       this.element.classList.remove('moving')
       this.element.classList.add('snapped')
       this.grid.clearGhost()
+      this.snap()
     }
     this._moving = state
   }
 
+  applyCoords(coords: Coords): void {
+    Object.keys(coords).forEach((key) => {
+      const value: number = coords[key as keyof Coords]!
+      this.element.style.setProperty(key, `${value}px`)
+    })
+  }
+  
   // collides(anotherWidget: Widget): boolean {
   //   // you cannot collide with yourself or a moving widget
   //   if (this.id == anotherWidget.id || this.moving) return false
@@ -132,4 +138,8 @@ export class Widget {
   //     row: range(this.placement.row, this.placement.row + this.placement.height)
   //   }
   // }
+}
+
+function getKeyValue<T>(key: string): any {
+  throw new Error("Function not implemented.")
 }

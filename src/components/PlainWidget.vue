@@ -1,6 +1,6 @@
 <template>
   <div :id='id'>
-    <h1>Hello {{ id }}</h1>
+    <h1 class='dragHandle'>Hello {{ id }}</h1>
     <span> {{ counter }}</span>
   </div>
 </template>

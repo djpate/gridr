@@ -1,5 +1,5 @@
+import { Coords } from "@/components/types"
 import { Widget } from "../widget"
-import debounce from 'lodash/debounce'
 type initialCoordinates = {
   offsetX: number,
   offsetY: number,
@@ -8,13 +8,13 @@ type initialCoordinates = {
 }
 
 export const draggable = (widget: Widget): void => {
-  const dragHandle = document.createElement("div")
-  dragHandle.classList.add('dragger')
-  dragHandle.addEventListener('mousedown', startDrag.bind(widget))
-  widget.element.appendChild(dragHandle)
+  Array.from(widget.element.getElementsByClassName('dragHandle')).forEach((handler: HTMLElement) => {
+    handler.addEventListener('mousedown', startDrag.bind(widget))
+    handler.style.cursor = 'grab'
+  })
 }
 
-const startDrag = function(this: Widget, event: DragEvent) {
+const startDrag = function(this: Widget, event: MouseEvent) {
   event.preventDefault()
   const gridSize = this.grid.rootElement.getBoundingClientRect()
   const size = this.element.getBoundingClientRect()
@@ -24,14 +24,12 @@ const startDrag = function(this: Widget, event: DragEvent) {
     width: size.width,
     height: size.height
   }
-  // this.element.style.position = 'absolute'
   this.element.style.width = `${size.width}px`
   this.element.style.height = `${size.height}px`
   this.element.style.top = `${String(size.top - gridSize.top)}px`
   this.element.style.left =`${String(size.left - gridSize.left)}px`
-  this.element.style.gridArea = ""
   this.moving = true
-  const mouseMoveHandler = debounce(drag.bind(this, initial))
+  const mouseMoveHandler = drag.bind(this, initial)
   window.addEventListener('mousemove', mouseMoveHandler)
   window.addEventListener('mouseup', stopDrag.bind(this, mouseMoveHandler), {once: true})
 }
@@ -44,16 +42,12 @@ const stopDrag = function (this: Widget, mouseMoveHandler: any, event: MouseEven
 }
 
 const drag = function(this: Widget, initial: initialCoordinates, event: DragEvent) {
-  // console.log(event)
   event.preventDefault()
-  // console.log('offset', this.grid.rootElement.offsetTop)
-  const top = Math.floor(event.pageY - this.grid.rootElement.offsetTop - initial.offsetY - initial.height)
-  const left = Math.floor(event.pageX - initial.offsetX)
-  // console.log('top', top)
-  // console.log('left', left)
-  this.element.style.top = `${String(top)}px`
-  this.element.style.left = `${String(left)}px`
-  // // this.element.style.transform = `translate(${left}px,${top}px)`
+  const coord: Coords = {
+    top: Math.floor(event.pageY - this.grid.rootElement.offsetTop - initial.offsetY),
+    left:  Math.floor(event.pageX - initial.offsetX),
+  }
+  this.applyCoords(coord)
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
 }

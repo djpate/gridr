@@ -3,51 +3,101 @@ import { Widget } from "../widget"
 type initialCoordinates = {
   mousex: number,
   mousey: number,
+  originalx: number,
+  originaly: number
   width: number,
-  height: number
+  height: number,
+  topOffset: number
+  leftOffset: number
+}
+
+enum Position {
+  topLeft = 'topLeft',
+  topRight = 'topRight',
+  bottomLeft = 'bottomLeft',
+  bottomRight = 'bottomRight',
 }
 
 export const resizable = (widget: Widget): void => {
-  ['top-left', 'top-right', 'bottom-left', 'bottom-right'].forEach((position) => {
+  [Position.topLeft, Position.topRight, Position.bottomLeft, Position.bottomRight].forEach((position) => {
     const resizeHandle = document.createElement("div")
     resizeHandle.classList.add('resizer')
-    resizeHandle.classList.add(position)
-    resizeHandle.addEventListener('mousedown', startResize.bind(widget))
+    resizeHandle.classList.add(String(position))
+    resizeHandle.addEventListener('mousedown', startResize.bind(widget, position))
     widget.element.appendChild(resizeHandle)
   })
 }
 
-const startResize = function(this: Widget, event: MouseEvent) {
+const startResize = function(this: Widget, position: Position, event: MouseEvent) {
   event.preventDefault()
   const size = this.element.getBoundingClientRect()
   const initial: initialCoordinates = {
     mousex:  event.pageX,
     mousey: event.pageY,
     width: size.width,
-    height: size.height
+    height: size.height,
+    topOffset: this.grid.rootElement.offsetTop,
+    leftOffset: this.grid.rootElement.offsetLeft,
+    originalx: this.element.offsetLeft,
+    originaly: this.element.offsetTop
   }
-  this.element.style.width = `${size.width}px`
-  this.element.style.height = `${size.height}px`
-  this.element.style.top = String(size.top)
-  this.element.style.left = String(size.left)
-  // this.element.style.position = 'absolute'
+  this.element.style.position = 'absolute'
   this.moving = true
-  const mouseMoveHandler = resize.bind(this, initial)
+  console.log(HandlerMap[position])
+  const mouseMoveHandler = HandlerMap[position].bind(this, initial)
   const mouseUpHandler = stopResize.bind(this, mouseMoveHandler)
   window.addEventListener('mousemove', mouseMoveHandler)
   window.addEventListener('mouseup', mouseUpHandler, {once: true})
 }
 
 const stopResize = function(this: Widget, mouseMoveHandler: any, event: MouseEvent) {
-  this.moving = false
   window.removeEventListener('mousemove', mouseMoveHandler)
-  this.snap()
+  this.moving = false
 }
 
-const resize = function (this: Widget, initial: initialCoordinates,  event: MouseEvent) {
-  event.preventDefault()
-  this.element.style.width = `${initial.width + (event.pageX - initial.mousex)}px`
-  this.element.style.height = `${initial.height + (event.pageY - initial.mousey)}px`
+const bottomRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
+  this.applyCoords({
+    width: initial.width + (event.pageX - initial.mousex),
+    height: initial.height + (event.pageY - initial.mousey),
+  })
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+}
+
+const bottomLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
+  this.applyCoords({
+    width: initial.width - (event.pageX - initial.mousex),
+    height: initial.height + (event.pageY - initial.mousey),
+    left: initial.originalx + (event.pageX - initial.mousex)
+  })
+  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  this.grid.setGhost(ghostPlacement)
+}
+
+const topRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
+  this.applyCoords({
+    width: initial.width + (event.pageX - initial.mousex),
+    height: initial.height - (event.pageY - initial.mousey),
+    top: initial.originaly + (event.pageY - initial.mousey),
+  })
+  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  this.grid.setGhost(ghostPlacement)
+}
+
+const topLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
+  this.applyCoords({
+    width: initial.width - (event.pageX - initial.mousex),
+    height: initial.height - (event.pageY - initial.mousey),
+    top:  initial.originaly + (event.pageY - initial.mousey),
+    left: initial.originalx + (event.pageX - initial.mousex)
+  })
+  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  this.grid.setGhost(ghostPlacement)
+}
+
+const HandlerMap = {
+  [Position.topLeft]: topLeft,
+  [Position.topRight]: topRight,
+  [Position.bottomLeft]: bottomLeft,
+  [Position.bottomRight]: bottomRight
 }

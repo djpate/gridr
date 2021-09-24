@@ -6,12 +6,13 @@ import { Widget } from "./widget";
 
 // prevents the widget boundaries to leave the allowed grid
 export const constrainedInGrid = (coords: Coords, gridWidth: number): Coords => {
-  return {
-    height: coords.height,
-    width: coords.width,
-    top: Math.max(0, coords.top),
-    left: Math.min(gridWidth - coords.width, Math.max(0, coords.left))
-  }
+  // return {
+  //   height: coords.height,
+  //   width: coords.width,
+  //   top: Math.max(0, coords.top),
+  //   left: Math.min(gridWidth - coords.width, Math.max(0, coords.left))
+  // }
+  return coords
 }
 
 export const getCoordsForElement = (element: HTMLElement): Coords => {
@@ -97,24 +98,35 @@ export class Grid {
   clearGhost() {
     const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
     ghost.style.display = 'none'
-    Array.from(this.rootElement.getElementsByClassName("ghostCell")).forEach((cell) => {
-      cell.remove()
+    Array.from(this.rootElement.getElementsByClassName("shadowRow")).forEach((row) => {
+      row.remove()
     })
   }
 
   setGhost(placement: Placement) {
     this.clearGhost()
     const shadowGrid = this.rootElement.getElementsByClassName('shadowGrid')[0] as HTMLDivElement
-    for(let col = 0; col < placement.endCol; col++) {
+    for(let row = 0; row < placement.height; row++) {
       const rowElement = document.createElement('div')
       rowElement.classList.add('shadowRow')
       shadowGrid.appendChild(rowElement)
-      for(let row = 0; row < placement.endRow; row++) {
+      for(let col = 0; col < placement.endCol; col++) {
         const cell = document.createElement("div")
         cell.classList.add('shadowCol')
         rowElement.appendChild(cell)
       }
     }
+    const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
+    ghost.style.display = 'block';
+    const ghostPadding = 20;
+    const width = (placement.width * (this.columnWidth + this.columnPadding)) - this.columnPadding - ghostPadding
+    const height = ((placement.height * (this.rowHeight + this.rowPadding)) - this.rowPadding) - ghostPadding
+    const top = Math.max(0, placement.startRow * (this.rowHeight + this.rowPadding)) + ghostPadding / 2
+    const left = Math.max(0, placement.startCol * (this.columnWidth + this.columnPadding)) + ghostPadding / 2
+    ghost.style.top = top + 'px'
+    ghost.style.left = left + 'px';
+    ghost.style.width = width + 'px'
+    ghost.style.height = height + 'px'
   }
 
   widget(id: string): Widget {
@@ -125,32 +137,14 @@ export class Grid {
     const parentRect = this.rootElement.getBoundingClientRect()
     const top = size.top - parentRect.top
     const left = size.left - parentRect.left
-    const startCol = Math.min(this.columns, Math.floor(left / this.columnWidth)) + 1 
+    const startCol = Math.min(this.columns, Math.floor(left / this.columnWidth))
     const endCol = Math.min(this.columns + 1, startCol + Math.ceil(size.width / (this.columnWidth + this.columnPadding)))
-    const startRow = Math.max(0, Math.floor(top / this.rowHeight)) + 1
+    const startRow = Math.max(0, Math.floor(top / this.rowHeight))
     const endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding))
     const placement = new Placement(startCol, endCol, startRow, endRow)
     return placement
   }
 
-  // // return a snapped placement for a given coordinates
-  // desiredPlacement(widget: Widget): Placement {
-  //   return new Placement(
-  //     Math.min(this.columns, Math.max(0, Math.floor(widget.coords.left / this.columnWidth))),
-  //     Math.max(0, Math.floor(widget.coords.top / this.rowHeight)),
-  //     Math.ceil(widget.coords.width / (this.columnWidth + this.columnPadding)),
-  //     Math.ceil(widget.coords.height / (this.rowHeight + this.rowPadding))
-  //   )
-  // }
-
-  // placementFromCoords(coords: Coords): Placement {
-  //   return new Placement(
-  //     Math.min(this.columns, Math.max(0, Math.floor(coords.left / this.columnWidth))),
-  //     Math.max(0, Math.floor(coords.top / this.rowHeight)),
-  //     Math.ceil(coords.width / (this.columnWidth + this.columnPadding)),
-  //     Math.ceil(coords.height / (this.rowHeight + this.rowPadding))
-  //   )
-  // }
 
   // updatePlacement(movingWidget: Widget, placement: Placement): void {
   //   if (movingWidget.placement.sameAs(placement)) return
@@ -164,16 +158,6 @@ export class Grid {
   //       this.snap(reflowedWidget)
   //     }
   //   })
-  // }
-
-  // snap(widget: Widget, checkCollisions = true ): void {
-  //   widget.coords = this.constrainedInGrid({
-  //     top: widget.placement.row * this.rowHeight + widget.placement.row * 20,
-  //     left: (widget.placement.col * this.columnWidth) + widget.placement.col * 20,
-  //     width: Math.floor(this.columnWidth * widget.placement.width + (widget.placement.width - 1) * 20),
-  //     height: Math.floor(this.rowHeight * widget.placement.height + (widget.placement.height - 1) * 20),
-  //   })
-  //   if (checkCollisions) this.handleColisions(widget)
   // }
 
   // handleColisions(snappedWidget: Widget): Widget[] {
@@ -200,10 +184,6 @@ export class Grid {
   //   return this.widgets.filter(widget => widget.reflowed)
   // }
 
-  // addWidget(widget: Widget): void {
-  //   this._widgets[widget.id] = widget
-  //   this.snap(widget, false)
-  // }
 
   // moveEverythingUp(rowIndex: number): void {
   //   if (this.gridMap.rowData(rowIndex).length !== 0 || rowIndex > this.gridMap.lastRow) return

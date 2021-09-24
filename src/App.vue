@@ -119,44 +119,52 @@ body {
       cursor: grab;
     }
   }
-  .grid {
-    margin: 20px;
-    position: relative;
-    .shadowGrid {
-      width: fit-content;
-    }
-  }
 
 .grid_root {
   margin: 20px;
   position: relative;
-  .shadowRow {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
-    height: 150px;
-    justify-content: space-evenly;
-    margin-bottom: 20px;
-    &::first-child {
-      margin-bottom: 0;
-    }
-    .shadowCol {
+  .shadowGrid {
+    width: fit-content;
+    .shadowRow {
       display: flex;
-      width: calc(calc((100vw - 140px) / 6)); // 20px padding and 5 * 20px margin (last col has no margin)
-      height: 100%;
-      border: 1px dashed blue;
-      box-sizing: border-box;
-      margin-right: 20px;
-      &:last-child {
-        margin-right: 0;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      width: 100%;
+      height: 150px;
+      justify-content: space-evenly;
+      margin-bottom: 20px;
+      &::first-child {
+        margin-bottom: 0;
+      }
+      .shadowCol {
+        display: flex;
+        width: calc(calc((100vw - 140px) / 6)); // 20px padding and 5 * 20px margin (last col has no margin)
+        height: 100%;
+        border: 1px dashed blue;
+        box-sizing: border-box;
+        margin-right: 20px;
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
+  }
+  .ghost {
+    top: 0;
+    left: 0;
+    background-color: #d6d6ff;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    position: absolute;
+    opacity: 0.5;
+    display: none;
   }
   .widget_container {
     border: 1px solid grey;
     filter: drop-shadow(5px 5px 2px #e1e1e1);
     background-color: white;
+    position: absolute;
     &.snapped {
       transition-property: width, height, top, left;
       transition-duration: .5s;
@@ -174,22 +182,22 @@ body {
       background: white;
       border: 3px solid #4286f4;
       position: absolute;
-      &.top-left {
+      &.topLeft {
         left: -5px;
         top: -5px;
         cursor: nwse-resize; /*resizer cursor*/
       }
-      &.top-right {
+      &.topRight {
         right: -5px;
         top: -5px;
         cursor: nesw-resize;
       }
-      &.bottom-left {
+      &.bottomLeft {
         left: -5px;
         bottom: -5px;
         cursor: nesw-resize;
       }
-      &.bottom-right {
+      &.bottomRight {
         right: -5px;
         bottom: -5px;
         cursor: nwse-resize;
