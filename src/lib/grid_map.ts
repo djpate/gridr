@@ -14,14 +14,14 @@ export class GridMap {
     return this.map[index] || []
   }
 
-  firstAvailablePlacement(width: number, height: number): Placement | undefined{
+  firstAvailablePlacement(width: number, height: number, widgetId?: string): Placement | undefined{
     let row = 0
     for(;;) {
       let startCol = 0
       let startRow = 0
       let fit
       for(let i = 0; i < height; i++) {
-        fit = this.canFitInRow(row + i, width, startCol)
+        fit = this.canFitInRow(row + i, width, startCol, widgetId)
         if (fit === undefined) break
         if (i === 0) {
           startCol = fit
@@ -36,12 +36,12 @@ export class GridMap {
     }
   }
 
-  private canFitInRow(rowIndex: number, width: number, startingCol = 0): number | undefined {
+  private canFitInRow(rowIndex: number, width: number, startingCol = 0, widgetId?: string): number | undefined {
     const data = this.rowData(rowIndex)
     let freeSpots = 0
     let startCol
     for(let col = startingCol; col < this.grid.columns; col++) {
-      freeSpots = data[col] === undefined ? freeSpots + 1 : 0
+      freeSpots = (data[col] === undefined || (widgetId && widgetId === data[col])) ? freeSpots + 1 : 0
       if (freeSpots === width) {
         startCol = col - width + 1
         break
@@ -64,5 +64,18 @@ export class GridMap {
       }
     })
     return grid
+  }
+
+  collisions(placement: Placement, widgetToIgnore?: string): Widget[] {
+    const colliding_ids = new Set<string>()
+    for(let row = placement.startRow; row < placement.endRow; row++) {
+      const rowData = this.rowData(row)
+      for(let col = placement.startCol; col < placement.endCol; col++) {
+        if (rowData[col] !== undefined && rowData[col] !== widgetToIgnore) {
+          colliding_ids.add(rowData[col])
+        }
+      }
+    }
+    return Array.from(colliding_ids).map((id) => this.grid._widgets[id])
   }
 }

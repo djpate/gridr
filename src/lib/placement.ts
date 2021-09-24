@@ -28,4 +28,21 @@ export class Placement {
     }
   }
 
+  moveColumn(columnIndex: number) {
+    const width = this.width
+    this.startCol = columnIndex
+    this.endCol = columnIndex + width
+  }
+
+  sameAs(placement: Placement): boolean {
+    return placement.startCol == this.startCol && 
+           placement.endCol == this.endCol && 
+           placement.startRow == this.startRow &&
+           placement.endRow == this.endRow
+  }
+
+  clone() : Placement {
+    return new Placement(this.startCol, this.endCol, this.startRow, this.endRow)
+  }
+
 }

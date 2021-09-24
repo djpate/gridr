@@ -1,6 +1,4 @@
 import { Coords } from "@/components/types"
-import { isGloballyWhitelisted } from "@vue/shared";
-import { add, uniqueId } from "lodash";
 import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
@@ -100,6 +98,7 @@ export class Grid {
   }
 
   clearGhost() {
+    this.rootElement.classList.remove('moving')
     const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
     ghost.style.display = 'none'
     Array.from(this.rootElement.getElementsByClassName("shadowRow")).forEach((row) => {
@@ -109,6 +108,7 @@ export class Grid {
 
   setGhost(placement: Placement) {
     this.clearGhost()
+    this.rootElement.classList.add('moving')
     const shadowGrid = this.rootElement.getElementsByClassName('shadowGrid')[0] as HTMLDivElement
     for(let row = 0; row < placement.height; row++) {
       const rowElement = document.createElement('div')
@@ -141,7 +141,7 @@ export class Grid {
     const parentRect = this.rootElement.getBoundingClientRect()
     const top = size.top - parentRect.top
     const left = size.left - parentRect.left
-    const startCol = Math.min(this.columns, Math.floor(left / this.columnWidth))
+    const startCol = Math.max(0, Math.min(this.columns, Math.floor(left / this.columnWidth)))
     const endCol = Math.min(this.columns + 1, startCol + Math.ceil(size.width / (this.columnWidth + this.columnPadding)))
     const startRow = Math.max(0, Math.floor(top / this.rowHeight))
     const endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding))
@@ -149,14 +149,9 @@ export class Grid {
     return placement
   }
 
-  firstAvailablePlacement(width: number, height: number) {
-    console.log(this.gridMap.map)
-  }
-
   get gridMap(): GridMap {
     return new GridMap(this)
   }
-
 
   // updatePlacement(movingWidget: Widget, placement: Placement): void {
   //   if (movingWidget.placement.sameAs(placement)) return

@@ -27,6 +27,7 @@ export class Widget {
 
   listeners: {[key: string]: any} = {}
   placement: Placement | null = null
+  previousPlacement: Placement | null = null
   grid: Grid
 
   constructor(element: HTMLDivElement, placement: Placement, grid: Grid) {
@@ -52,6 +53,7 @@ export class Widget {
 
   snap() {
     if (!this.placement) return
+    this.element.classList.add('snapped')
     this.applyCoords({
       top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * 20,
       left: (this.placement.startCol * this.grid.columnWidth) + this.placement.startCol * 20,
@@ -67,12 +69,28 @@ export class Widget {
       this.placement = null
     } else {
       this.element.classList.remove('moving')
-      this.element.classList.add('snapped')
       this.grid.clearGhost()
-      this.placement = this.grid.placement(this.element.getBoundingClientRect())
       this.snap()
     }
     this._moving = state
+  }
+
+  move(placement: Placement) {
+    if (this.placement && this.placement.sameAs(placement)) return
+    const collisions = this.grid.gridMap.collisions(placement)
+    if (collisions.length) {
+      collisions.forEach((collidingWidget) => {
+        const tentativeStartCol = placement.endCol
+        if (tentativeStartCol + collidingWidget.placement!.width < this.grid.columns) {
+          // can fit on same row so shifting right
+          collidingWidget.placement?.moveColumn(tentativeStartCol)
+          collidingWidget.snap()
+        }
+      })
+    } else {
+      this.placement = placement
+    }
+    console.log(this.grid.gridMap.map)
   }
 
   applyCoords(coords: Coords): void {
@@ -138,8 +156,4 @@ export class Widget {
   //     row: range(this.placement.row, this.placement.row + this.placement.height)
   //   }
   // }
-}
-
-function getKeyValue<T>(key: string): any {
-  throw new Error("Function not implemented.")
 }

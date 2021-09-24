@@ -45,8 +45,8 @@ export default class App extends Vue {
 
   addNewWidget(): void {
     this.widgets[uniqueId()] = {
-      width: random(1, 5),
-      height: random(1, 5)
+      width: random(1,2),
+      height: random(1, 3)
     }
   }
 
@@ -167,6 +167,8 @@ body {
     position: absolute;
     opacity: 0.5;
     display: none;
+    transition-property: width, height, top, left;
+    transition-duration: .2s;
   }
   .widget_container {
     border: 1px solid grey;
@@ -180,6 +182,7 @@ body {
     &.moving {
       opacity: 0.9;
       pointer-events: none;
+      z-index: 10;
     }
     z-index: 3;
     .resizer{
@@ -225,6 +228,13 @@ body {
       bottom: 0;
       right: 20;
     }
+  }
+  &.moving {
+    .widget_container {
+      &.snapped {
+        opacity: 0.5;
+      }
+    };
   }
 }
 }

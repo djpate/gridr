@@ -50,4 +50,5 @@ const drag = function(this: Widget, initial: initialCoordinates, event: DragEven
   this.applyCoords(coord)
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+  this.move(ghostPlacement)
 }
