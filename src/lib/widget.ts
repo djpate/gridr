@@ -14,8 +14,6 @@ export class Widget {
     left: 0
   }
 
-  // placement: Placement
-  originalPlacement: Placement | null = null
   _moving = false
   _reflowed = false
   minWidth = 1
@@ -28,14 +26,14 @@ export class Widget {
   id: string
 
   listeners: {[key: string]: any} = {}
-  placement: Placement
+  placement: Placement | null = null
   grid: Grid
 
-  constructor(element: HTMLDivElement, grid: Grid) {
+  constructor(element: HTMLDivElement, placement: Placement, grid: Grid) {
     this.grid = grid
     this.element = element
+    this.placement = placement
     this.id = element.id || uniqueId();
-    this.placement = new Placement(0, 1, 0, 1)
     this.setupWidgetWrapper()
     resizable(this)
     draggable(this)
@@ -53,12 +51,12 @@ export class Widget {
   }
 
   snap() {
-    const placement = this.grid.placement(this.element.getBoundingClientRect())
+    if (!this.placement) return
     this.applyCoords({
-      top: placement.startRow * this.grid.rowHeight + placement.startRow * 20,
-      left: (placement.startCol * this.grid.columnWidth) + placement.startCol * 20,
-      width: Math.floor(this.grid.columnWidth * placement.width + (placement.width - 1) * 20),
-      height: Math.floor(this.grid.rowHeight * placement.height + (placement.height - 1) * 20)
+      top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * 20,
+      left: (this.placement.startCol * this.grid.columnWidth) + this.placement.startCol * 20,
+      width: Math.floor(this.grid.columnWidth * this.placement.width + (this.placement.width - 1) * 20),
+      height: Math.floor(this.grid.rowHeight * this.placement.height + (this.placement.height - 1) * 20)
     })
   }
 
@@ -66,10 +64,12 @@ export class Widget {
     if (state) {
       this.element.classList.remove('snapped')
       this.element.classList.add('moving')
+      this.placement = null
     } else {
       this.element.classList.remove('moving')
       this.element.classList.add('snapped')
       this.grid.clearGhost()
+      this.placement = this.grid.placement(this.element.getBoundingClientRect())
       this.snap()
     }
     this._moving = state
