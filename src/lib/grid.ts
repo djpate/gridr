@@ -1,6 +1,7 @@
 import { Coords } from "@/components/types"
 import { isGloballyWhitelisted } from "@vue/shared";
 import { add, uniqueId } from "lodash";
+import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
 
@@ -69,7 +70,10 @@ export class Grid {
   }
 
   setupWidget(element: HTMLDivElement) {
-    const widget = new Widget(element as HTMLDivElement, this)
+    const width = Number(element.dataset.width) || 1
+    const height = Number(element.dataset.height) || 1
+    const placement = this.gridMap.firstAvailablePlacement(width, height)!
+    const widget = new Widget(element as HTMLDivElement, placement, this)
     this._widgets[widget.id] = widget
   }
 
@@ -143,6 +147,14 @@ export class Grid {
     const endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding))
     const placement = new Placement(startCol, endCol, startRow, endRow)
     return placement
+  }
+
+  firstAvailablePlacement(width: number, height: number) {
+    console.log(this.gridMap.map)
+  }
+
+  get gridMap(): GridMap {
+    return new GridMap(this)
   }
 
 

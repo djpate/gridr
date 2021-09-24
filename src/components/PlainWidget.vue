@@ -1,5 +1,5 @@
 <template>
-  <div :id='id'>
+  <div :id='id' :data-width='width' :data-height='height'>
     <h1 class='dragHandle'>Hello {{ id }}</h1>
     <span> {{ counter }}</span>
   </div>
@@ -15,6 +15,8 @@ export default class PlainWidget extends Vue {
   counter = 0
 
   @Prop() id!: string
+  @Prop() width!: number
+  @Prop() height!: number
 
   mounted() {
     this.updateCounter()

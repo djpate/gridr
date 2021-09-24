@@ -1,57 +1,68 @@
-// import { times } from "lodash";
-// import { Grid } from "./grid";
-// import { Placement } from "./placement";
-// import { Widget } from "./widget";
-// import { v4 as uuid } from 'uuid'
+import { times } from "lodash";
+import { Grid } from "./grid";
+import { Placement } from "./placement";
+import { Widget } from "./widget";
+import { v4 as uuid } from 'uuid'
 
-// export class GridMap {
-//   grid: Grid
-//   constructor(grid: Grid) {
-//     this.grid = grid
-//   }
+export class GridMap {
+  grid: Grid
+  constructor(grid: Grid) {
+    this.grid = grid
+  }
 
-//   rowData(index: number): string[] {
-//     return this.map[index] || []
-//   }
+  rowData(index: number): string[] {
+    return this.map[index] || []
+  }
 
-//   firstFreeSpot(width: number, height: number): Placement {
-//     let found = false
-//     let row = 0
-//     let placement: Placement
-//     while(found === false) {
-//       for(let col = 0; col < (this.grid.columns - width); col++) {
-//         placement = new Placement(col, row, width, height)
-//         if (this.canFitWithoutColliding(placement, uuid())) {
-//           found = true
-//           break
-//         }
-//       }
-//       row++
-//     }
-//     return placement!
-//   }
+  firstAvailablePlacement(width: number, height: number): Placement | undefined{
+    let row = 0
+    for(;;) {
+      let startCol = 0
+      let startRow = 0
+      let fit
+      for(let i = 0; i < height; i++) {
+        fit = this.canFitInRow(row + i, width, startCol)
+        if (fit === undefined) break
+        if (i === 0) {
+          startCol = fit
+          startRow = row
+        }
+      }
+      if (fit !== undefined) {
+        return new Placement(startCol, startCol + width, startRow, startRow! + height)
+      } else {
+        row++
+      }
+    }
+  }
 
-//   get lastRow() {
-//     return Object.keys(this.map).length - 1
-//   }
+  private canFitInRow(rowIndex: number, width: number, startingCol = 0): number | undefined {
+    const data = this.rowData(rowIndex)
+    let freeSpots = 0
+    let startCol
+    for(let col = startingCol; col < this.grid.columns; col++) {
+      freeSpots = data[col] === undefined ? freeSpots + 1 : 0
+      if (freeSpots === width) {
+        startCol = col - width + 1
+        break
+      }
+    }
+    return startCol
+  }
 
-//   canFitWithoutColliding(placement: Placement, id: string): boolean {
-//     const mock = new Widget(placement)
-//     mock.id = id // this let's us prevent colliding with yourself
-//     return !this.grid.widgets.map((Widget) => Widget.collides(mock)).some(Boolean)
-//   }
-
-//   get map(){
-//     const grid: {[key: number]: string[]} = {}
-//     this.grid.widgets.forEach((widget) => {
-//       const ranges = widget.placementRanges
-//       ranges.row.forEach((row) => {
-//         grid[row] ??= []
-//         ranges.col.forEach((col) => {
-//           grid[row][col] = widget.id
-//         })
-//       })
-//     })
-//     return grid
-//   }
-// }
+  get map(){
+    const grid: {[key: number]: string[]} = {}
+    this.grid.widgets.forEach((widget) => {
+      if (widget.placement) {
+        const ranges = widget.placement.ranges
+        ranges.row.forEach((row) => {
+          grid[row] ??= []
+          ranges.col.forEach((col) => {
+            grid[row][col] = widget.id
+          })
+        })
+      }
+    })
+    return grid
+  }
+}

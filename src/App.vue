@@ -3,7 +3,7 @@
     <div class="new" @mousedown='addNewWidget'>Some widget</div>
   </div>
   <div id="grid">
-    <Widget class="widget" v-for='widget in widgets' :id='widget' :key='widget'></Widget>
+    <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :id='name' :key='name'></Widget>
   </div>
 </template>
 
@@ -24,7 +24,12 @@ export default class App extends Vue {
   rows = 0
   cols = 0
 
-  widgets = ['foo']
+  widgets = {
+    [uniqueId()]: {
+      width: 1,
+      height: 1
+    }
+  }
 
   grid!: Grid
   intentTimeout = 0
@@ -39,7 +44,10 @@ export default class App extends Vue {
   }
 
   addNewWidget(): void {
-    this.widgets.push(uniqueId())
+    this.widgets[uniqueId()] = {
+      width: random(1, 5),
+      height: random(1, 5)
+    }
   }
 
   // showSnapGrid(widget: GridWidget): void {

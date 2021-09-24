@@ -1,3 +1,4 @@
+import { range } from 'lodash'
 import clone from 'lodash/clone'
 export class Placement {
   startCol: number
@@ -18,6 +19,13 @@ export class Placement {
 
   get height() {
     return this.endRow - this.startRow
+  }
+
+  get ranges() {
+    return {
+      col: range(this.startCol, this.endCol),
+      row: range(this.startRow, this.endRow)
+    }
   }
 
 }
