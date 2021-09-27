@@ -34,7 +34,6 @@ export class Grid {
   columns: number
   movingWidget = false
   observer: MutationObserver
-  listeners: {[key: string]: any} = {}
 
   constructor(id: string, columns: number) {
     const rootElement = document.getElementById(id)
@@ -48,7 +47,6 @@ export class Grid {
     rootElement.appendChild(shadowGrid)
     
     this.columns = columns
-    this.listeners = {}
     this.observer = new MutationObserver(this.newWidgetObserver.bind(this))
     this.observer.observe(this.rootElement, {subtree: false, childList: true})
     this.setupInitialWidgets()
@@ -67,7 +65,7 @@ export class Grid {
     this.rootElement.appendChild(ghost)
   }
 
-  setupWidget(element: HTMLDivElement) {
+  setupWidget(element: HTMLDivElement): void {
     const width = Number(element.dataset.width) || 1
     const height = Number(element.dataset.height) || 1
     const placement = this.gridMap.firstAvailablePlacement(width, height)!
@@ -75,7 +73,7 @@ export class Grid {
     this._widgets[widget.id] = widget
   }
 
-  newWidgetObserver(mutations: MutationRecord[], observer: MutationObserver) {
+  newWidgetObserver(mutations: MutationRecord[], observer: MutationObserver): void {
     mutations.forEach((mutation_record) => {
       mutation_record.addedNodes.forEach((addedNode) => {
         if ((addedNode as HTMLElement).classList.contains('widget')) {
@@ -97,7 +95,7 @@ export class Grid {
     return Object.values(this._widgets)
   }
 
-  clearGhost() {
+  clearGhost(): void {
     this.rootElement.classList.remove('moving')
     const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
     ghost.style.display = 'none'
@@ -106,7 +104,7 @@ export class Grid {
     })
   }
 
-  setGhost(placement: Placement) {
+  setGhost(placement: Placement): void {
     this.clearGhost()
     this.rootElement.classList.add('moving')
     const shadowGrid = this.rootElement.getElementsByClassName('shadowGrid')[0] as HTMLDivElement
@@ -137,7 +135,7 @@ export class Grid {
     return this._widgets[id]
   }
 
-  placement(size: DOMRectReadOnly) {
+  placement(size: DOMRectReadOnly): Placement {
     const parentRect = this.rootElement.getBoundingClientRect()
     const top = size.top - parentRect.top
     const left = size.left - parentRect.left

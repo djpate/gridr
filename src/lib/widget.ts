@@ -25,7 +25,6 @@ export class Widget {
   // unique id to identify the widget
   id: string
 
-  listeners: {[key: string]: any} = {}
   placement: Placement | null = null
   previousPlacement: Placement | null = null
   grid: Grid
@@ -51,7 +50,7 @@ export class Widget {
     this.grid.rootElement.appendChild(wrapped)
   }
 
-  snap() {
+  snap(): void {
     if (!this.placement) return
     this.element.classList.add('snapped')
     this.applyCoords({
@@ -75,7 +74,7 @@ export class Widget {
     this._moving = state
   }
 
-  move(placement: Placement) {
+  move(placement: Placement): void {
     if (this.placement && this.placement.sameAs(placement)) return
     const collisions = this.grid.gridMap.collisions(placement)
     if (collisions.length) {
