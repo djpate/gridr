@@ -26,7 +26,6 @@ export class GridMap {
       } else {
         counter = 0
       }
-      console.log(counter)
       if (counter === height) {
         return new Placement(previousColumns[0], previousColumns[0] + width, row - height + 1, row + height)
       } else {
@@ -40,8 +39,9 @@ export class GridMap {
   private potentialStartColumnsInRow(rowIndex: number, width: number): number[] {
     const cols: number[] = []
     const rowData = this.rowData(rowIndex)
-    if (rowData.length > this.grid.columns - width) return []
-    if (rowData.length === 0) return range(this.grid.columns)
+    const columnsInRow =  rowData.filter((cell) => cell !== undefined).length
+    if (columnsInRow > (this.grid.columns - width)) return []
+    if (columnsInRow === 0) return range(this.grid.columns)
     let counter = 0
     for(let i = 0; i < this.grid.columns; i++) {
       if (rowData[i] === undefined) counter++
