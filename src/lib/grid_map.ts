@@ -34,6 +34,29 @@ export class GridMap {
     }
   }
 
+  maxStartingRowByCol(col: number, widget: Widget): number {
+    let row = 0
+    let max = 0
+    let lastWidgetOnCol: string | undefined
+    console.log(this.map)
+    for(;;) {
+      const rowData = this.rowData(row)
+      if (rowData[col] !== undefined) {
+        lastWidgetOnCol = rowData[col]
+      } else if (lastWidgetOnCol === widget.id) {
+        max = row - widget.placement!.height
+        break
+      } else {
+        max = row
+        break
+      }
+      row++
+    }
+    console.log('last wid', lastWidgetOnCol)
+    console.log('max for', col, 'is', max)
+    return max
+  }
+
   // given a row and width give me all the potential cols 
   // I could start at without colliding with something
   private potentialStartColumnsInRow(rowIndex: number, width: number): number[] {

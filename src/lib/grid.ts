@@ -144,13 +144,15 @@ export class Grid {
     return this._widgets[id]
   }
 
-  placement(size: DOMRectReadOnly): Placement {
+  placement(widget: Widget): Placement {
+    const size = widget.element.getBoundingClientRect()
     const parentRect = this.rootElement.getBoundingClientRect()
     const top = size.top - parentRect.top
     const left = size.left - parentRect.left
     const startCol = Math.max(0, Math.min(this.columns, Math.floor(left / this.columnWidth)))
     const endCol = Math.min(this.columns + 1, startCol + Math.ceil(size.width / (this.columnWidth + this.columnPadding)))
-    const startRow = Math.max(0, Math.floor(top / this.rowHeight))
+    const maxStartRow = this.gridMap.maxStartingRowByCol(startCol, widget)
+    const startRow = Math.min(maxStartRow, Math.max(0, Math.floor(top / this.rowHeight)))
     const endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding))
     const placement = new Placement(startCol, endCol, startRow, endRow)
     return placement

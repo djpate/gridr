@@ -59,7 +59,7 @@ const bottomRight = function(this: Widget, initial: initialCoordinates, event: M
     width: initial.width + (event.pageX - initial.mousex),
     height: initial.height + (event.pageY - initial.mousey),
   })
-  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
 }
@@ -70,7 +70,7 @@ const bottomLeft = function(this: Widget, initial: initialCoordinates, event: Mo
     height: initial.height + (event.pageY - initial.mousey),
     left: initial.originalx + (event.pageX - initial.mousex)
   })
-  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
 }
@@ -81,7 +81,7 @@ const topRight = function(this: Widget, initial: initialCoordinates, event: Mous
     height: initial.height - (event.pageY - initial.mousey),
     top: initial.originaly + (event.pageY - initial.mousey),
   })
-  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
 }
@@ -93,7 +93,7 @@ const topLeft = function(this: Widget, initial: initialCoordinates, event: Mouse
     top:  initial.originaly + (event.pageY - initial.mousey),
     left: initial.originalx + (event.pageX - initial.mousex)
   })
-  const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
+  const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
 }

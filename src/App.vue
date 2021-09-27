@@ -177,7 +177,7 @@ body {
   &.moving {
     .widget_container {
       &.snapped {
-        opacity: 0.5;
+        opacity: 0.7;
       }
     };
   }
