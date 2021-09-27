@@ -158,6 +158,11 @@ export class Grid {
 
   delete(widget: Widget): void {
     delete this._widgets[widget.id]
+    console.log(widget.placement)
+    if (!widget.placement) {
+      console.error('widget', widget.id, 'does not have a placement ?')
+      return
+    }
     for(let row = widget.placement!.endRow; row >= widget.placement!.startRow; row--){
       const rowData = this.gridMap.rowData(row)
       if (!rowData.length) this.gridMap.deleteRow(row)

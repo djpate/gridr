@@ -53,6 +53,7 @@ export class Widget {
   }
 
   snap(): void {
+    if (!this.placement) debugger
     if (!this.placement) return
     this.element.classList.add('snapped')
     this.applyCoords({
@@ -67,8 +68,10 @@ export class Widget {
     if (state) {
       this.element.classList.remove('snapped')
       this.element.classList.add('moving')
+      this.previousPlacement = this.placement!.clone()
       this.placement = null
     } else {
+      this.placement ??= this.previousPlacement
       this.element.classList.remove('moving')
       this.grid.clearGhost()
       this.snap()
