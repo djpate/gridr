@@ -130,7 +130,6 @@ export class Grid {
     const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
     ghost.style.display = 'block';
     const ghostPadding = 20;
-    console.log(this.columnWidth)
     const width = (placement.width * (this.columnWidth + this.columnPadding)) - this.columnPadding - ghostPadding
     const height = ((placement.height * (this.rowHeight + this.rowPadding)) - this.rowPadding) - ghostPadding
     const top = Math.max(0, placement.startRow * (this.rowHeight + this.rowPadding)) + ghostPadding / 2
