@@ -27,7 +27,7 @@ export class GridMap {
         counter = 0
       }
       if (counter === height) {
-        return new Placement(previousColumns[0], previousColumns[0] + width, row - height + 1, row + height)
+        return new Placement(previousColumns[0], previousColumns[0] + width, row - height + 1, row + 1)
       } else {
         row++
       }

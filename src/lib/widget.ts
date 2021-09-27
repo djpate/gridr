@@ -26,7 +26,7 @@ export class Widget {
   // unique id to identify the widget
   id: string
 
-  placement: Placement | null = null
+  _placement: Placement | null = null
   previousPlacement: Placement | null = null
   grid: Grid
 
@@ -107,5 +107,13 @@ export class Widget {
       const value: number = coords[key as keyof Coords]!
       this.element.style.setProperty(key, `${value}px`)
     })
+  }
+
+  set placement(placement: Placement | null) {
+    this._placement = placement
+  }
+
+  get placement(): Placement | null {
+    return this._placement
   }
 }
