@@ -13,7 +13,7 @@ type initialCoordinates = {
 
 enum Position {
   topLeft = 'topLeft',
-  topRight = 'topRight',
+topRight = 'topRight',
   bottomLeft = 'bottomLeft',
   bottomRight = 'bottomRight',
 }
@@ -43,7 +43,6 @@ const startResize = function(this: Widget, position: Position, event: MouseEvent
   }
   this.element.style.position = 'absolute'
   this.moving = true
-  console.log(HandlerMap[position])
   const mouseMoveHandler = HandlerMap[position].bind(this, initial)
   const mouseUpHandler = stopResize.bind(this, mouseMoveHandler)
   window.addEventListener('mousemove', mouseMoveHandler)
@@ -62,6 +61,7 @@ const bottomRight = function(this: Widget, initial: initialCoordinates, event: M
   })
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+  this.move(ghostPlacement)
 }
 
 const bottomLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
@@ -72,6 +72,7 @@ const bottomLeft = function(this: Widget, initial: initialCoordinates, event: Mo
   })
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+  this.move(ghostPlacement)
 }
 
 const topRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
@@ -82,6 +83,7 @@ const topRight = function(this: Widget, initial: initialCoordinates, event: Mous
   })
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+  this.move(ghostPlacement)
 }
 
 const topLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
@@ -93,6 +95,7 @@ const topLeft = function(this: Widget, initial: initialCoordinates, event: Mouse
   })
   const ghostPlacement = this.grid.placement(this.element.getBoundingClientRect())
   this.grid.setGhost(ghostPlacement)
+  this.move(ghostPlacement)
 }
 
 const HandlerMap = {

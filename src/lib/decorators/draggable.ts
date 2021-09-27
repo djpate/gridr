@@ -34,11 +34,10 @@ const startDrag = function(this: Widget, event: MouseEvent) {
   window.addEventListener('mouseup', stopDrag.bind(this, mouseMoveHandler), {once: true})
 }
 
-const stopDrag = function (this: Widget, mouseMoveHandler: any, event: MouseEvent) {
+const stopDrag = function (this: Widget, mouseMoveHandler: (event: MouseEvent) => void, event: MouseEvent) {
   event.preventDefault()
   this.moving = false
   window.removeEventListener('mousemove', mouseMoveHandler)
-  this.snap()
 }
 
 const drag = function(this: Widget, initial: initialCoordinates, event: DragEvent) {

@@ -1,4 +1,4 @@
-import { times } from "lodash";
+import { intersection, range, times } from "lodash";
 import { Grid } from "./grid";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
@@ -14,43 +14,44 @@ export class GridMap {
     return this.map[index] || []
   }
 
-  firstAvailablePlacement(width: number, height: number, widgetId?: string): Placement | undefined{
+  firstAvailablePlacement(width: number, height: number, widgetId?: string): Placement{
     let row = 0
+    let counter = 0
+    let previousColumns
     for(;;) {
-      let startCol = 0
-      let startRow = 0
-      let fit
-      for(let i = 0; i < height; i++) {
-        fit = this.canFitInRow(row + i, width, startCol, widgetId)
-        if (fit === undefined) break
-        if (i === 0) {
-          startCol = fit
-          startRow = row
-        }
+      const columns = this.potentialStartColumnsInRow(row, width)
+      previousColumns = (previousColumns && previousColumns.length) ? intersection(previousColumns, columns) : columns
+      if (previousColumns.length) {
+        counter++
+      } else {
+        counter = 0
       }
-      if (fit !== undefined) {
-        return new Placement(startCol, startCol + width, startRow, startRow! + height)
+      console.log(counter)
+      if (counter === height) {
+        return new Placement(previousColumns[0], previousColumns[0] + width, row - height + 1, row + height)
       } else {
         row++
       }
     }
   }
 
-  private canFitInRow(rowIndex: number, width: number, startingCol = 0, widgetId?: string): number | undefined {
-    const data = this.rowData(rowIndex)
-    let freeSpots = 0
-    let startCol
-    for(let col = startingCol; col < this.grid.columns; col++) {
-      freeSpots = (data[col] === undefined || (widgetId && widgetId === data[col])) ? freeSpots + 1 : 0
-      if (freeSpots === width) {
-        startCol = col - width + 1
-        break
-      }
+  // given a row and width give me all the potential cols 
+  // I could start at without colliding with something
+  private potentialStartColumnsInRow(rowIndex: number, width: number): number[] {
+    const cols: number[] = []
+    const rowData = this.rowData(rowIndex)
+    if (rowData.length > this.grid.columns - width) return []
+    if (rowData.length === 0) return range(this.grid.columns)
+    let counter = 0
+    for(let i = 0; i < this.grid.columns; i++) {
+      if (rowData[i] === undefined) counter++
+      else counter = 0
+      if (counter >= width) cols.push(i - (width - 1))
     }
-    return startCol
+    return cols
   }
 
-  get map(){
+  get map(): {[key: number]: string[]}{
     const grid: {[key: number]: string[]} = {}
     this.grid.widgets.forEach((widget) => {
       if (widget.placement) {

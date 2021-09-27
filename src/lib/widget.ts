@@ -74,22 +74,22 @@ export class Widget {
     this._moving = state
   }
 
+  closestNewSpot(): Placement {
+    // remove yourself from the grid
+    const placement = this.placement!.clone()
+    this.placement = null
+    return this.grid.gridMap.firstAvailablePlacement(placement.width, placement.height)!
+  }
+
   move(placement: Placement): void {
     if (this.placement && this.placement.sameAs(placement)) return
-    const collisions = this.grid.gridMap.collisions(placement)
-    if (collisions.length) {
-      collisions.forEach((collidingWidget) => {
-        const tentativeStartCol = placement.endCol
-        if (tentativeStartCol + collidingWidget.placement!.width < this.grid.columns) {
-          // can fit on same row so shifting right
-          collidingWidget.placement?.moveColumn(tentativeStartCol)
-          collidingWidget.snap()
-        }
-      })
-    } else {
-      this.placement = placement
-    }
-    console.log(this.grid.gridMap.map)
+    const collisions = this.grid.gridMap.collisions(placement, this.id)
+    this.placement = placement
+    collisions.forEach((collidingWidget) => {
+      const newPlacement = collidingWidget.closestNewSpot()
+      collidingWidget.placement = newPlacement
+      collidingWidget.snap()
+    })
   }
 
   applyCoords(coords: Coords): void {
