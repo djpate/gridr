@@ -1,4 +1,4 @@
-import { intersection, range, times } from "lodash";
+import { intersection, last, range, times } from "lodash";
 import { Grid } from "./grid";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
@@ -65,6 +65,32 @@ export class GridMap {
       }
     })
     return grid
+  }
+
+  get lastRow(): number {
+    const rowIds = Object.keys(this.map)
+    return rowIds.length ? Number(last(Object.keys(this.map).sort())) : 0
+  }
+
+  deleteRow(rowId: number): void {
+    const lastRow = this.lastRow
+    const visited = new Set<string>();
+    for(let i = rowId; i <= lastRow; i++) {
+      const rowData = this.rowData(i)
+      for (let y = 0; y < this.grid.columns; y++) {
+        if (rowData[y] !== undefined && !visited.has(rowData[y])) {
+          visited.add(rowData[y])
+        }
+      }
+    }
+    visited.forEach((widgetId) => {
+      const widget = this.grid.widget(widgetId)
+      const placement: Placement = this.grid.widget(widgetId).placement!.clone()
+      placement.startRow = placement.startRow - 1
+      placement.endRow = placement.endRow - 1
+      widget.placement = placement
+      widget.snap()
+    })
   }
 
   collisions(placement: Placement, widgetToIgnore?: string): Widget[] {

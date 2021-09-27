@@ -49,61 +49,6 @@ export default class App extends Vue {
       height: random(1, 3)
     }
   }
-
-  // showSnapGrid(widget: GridWidget): void {
-  //   let placement = this.grid.desiredPlacement(widget)
-  //   clearTimeout(this.intentTimeout)
-  //   this.cols = Math.min(6, placement.col + placement.width + 1)
-  //   this.rows = placement.row + placement.height + 1
-  //   this.displayShadow(placement)
-    
-
-  //   // try to be smart about when to move other widgets when collision will occur
-  //   let mockWidget = new GridWidget(placement)
-  //   let willCollide = this.grid.widgets.map((widget) => widget.collides(mockWidget)).some(Boolean)
-  //   // console.log('collision?', willCollide, placement)
-  //   let timeout = willCollide ? 125 : 0
-  //   this.intentTimeout = setTimeout(() => {
-  //     this.grid.updatePlacement(widget, placement)
-  //   }, timeout)
-  // }
-
-  // displayShadow(placement: Placement): void {
-  //   let ghost = (this.$refs.ghost as HTMLDivElement)
-  //   ghost.style.display = 'block';
-  //   let ghostPadding = 20;
-  //   let width = (placement.width * (this.grid.columnWidth + this.grid.columnPadding)) - this.grid.columnPadding - ghostPadding
-  //   let height = ((placement.height * (this.grid.rowHeight + this.grid.rowPadding)) - this.grid.rowPadding) - ghostPadding
-  //   let top = Math.max(0, placement.row * (this.grid.rowHeight + this.grid.rowPadding)) + ghostPadding / 2
-  //   let left = Math.max(0, placement.col * (this.grid.columnWidth + this.grid.columnPadding)) + ghostPadding / 2
-  //   ghost.style.top = top + 'px'
-  //   ghost.style.left = left + 'px';
-  //   ghost.style.width = width + 'px'
-  //   ghost.style.height = height + 'px'
-  // }
-
-  // hideSnapGrid(): void {
-  //   this.rows = 0;
-  //   this.cols = 0;
-  //   (this.$refs.ghost as HTMLDivElement).style.display = 'none';
-  // }
-
-  // removeWidget(id: string): void {
-  //   this.grid!.removeWidget(id)
-  // }
-
-  // addNewWidget(): void {
-  //   const width = random(1, 2)
-  //   const height = random(1, 2)
-  //   let placement = this.grid.gridMap.firstFreeSpot(width, height)
-  //   let widget = new GridWidget(placement)
-  //   this.grid!.addWidget(widget)
-  // }
-
-  // demoSetup(): void {
-  //   this.addNewWidget()
-  //   this.addNewWidget()
-  // }
 }
 </script>
 

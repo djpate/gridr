@@ -1,6 +1,7 @@
 <template>
   <div :id='id' :data-width='width' :data-height='height'>
     <h1 class='dragHandle'>Hello {{ id }}</h1>
+    <span class='closeHandle'>X</span>
     <span> {{ counter }}</span>
   </div>
 </template>
@@ -18,11 +19,11 @@ export default class PlainWidget extends Vue {
   @Prop() width!: number
   @Prop() height!: number
 
-  mounted() {
+  mounted(): void {
     this.updateCounter()
   }
 
-  updateCounter() {
+  updateCounter(): void {
     setTimeout(() => {
       this.counter = this.counter + 1
       this.updateCounter()
@@ -33,4 +34,10 @@ export default class PlainWidget extends Vue {
 </script>
 
 <style lang='scss' scoped>
+.closeHandle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
 </style>

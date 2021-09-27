@@ -2,6 +2,7 @@ import { Coords } from "@/components/types"
 import { uniqueId, wrap } from "lodash"
 import { draggable } from "./decorators/draggable"
 import { resizable } from "./decorators/resizable"
+import { deletable } from "./decorators/deletable"
 import { Grid } from "./grid"
 import { Placement } from "./placement"
 
@@ -37,6 +38,7 @@ export class Widget {
     this.setupWidgetWrapper()
     resizable(this)
     draggable(this)
+    deletable(this)
     this.snap()
   }
 
@@ -92,67 +94,15 @@ export class Widget {
     })
   }
 
+  delete(): void {
+    this.element.remove()
+    this.grid.delete(this)
+  }
+
   applyCoords(coords: Coords): void {
     Object.keys(coords).forEach((key) => {
       const value: number = coords[key as keyof Coords]!
       this.element.style.setProperty(key, `${value}px`)
     })
   }
-  
-  // collides(anotherWidget: Widget): boolean {
-  //   // you cannot collide with yourself or a moving widget
-  //   if (this.id == anotherWidget.id || this.moving) return false
-  //   const collides =  intersection(this.placementRanges.col, anotherWidget.placementRanges.col).length > 0 &&
-  //          intersection(this.placementRanges.row, anotherWidget.placementRanges.row).length > 0
-  //   return collides
-  // }
-
-  // set coords(coords: Coords) {
-  //   this._coords = coords
-  //   if (!this.element) return
-  //   this.element.style.height = this._coords.height + 'px'
-  //   this.element.style.width = this._coords.width + 'px'
-  //   this.element.style.top = this._coords.top + 'px'
-  //   this.element.style.left = this._coords.left + 'px'
-  // }
-
-  // get coords(): Coords {
-  //   return this._coords
-  // }
-
-  // get moving(): boolean {
-  //   return this._moving
-  // }
-
-  // set moving(state: boolean) {
-  //   if (state) {
-  //     this.originalPlacement = this.placement.clone
-  //   } else {
-  //     console.log('moved', this.moved.length)
-  //     console.log('stopped moving')
-  //     this.moved = []
-  //     this.originalPlacement = null
-  //   }
-  //   this._moving = state
-  // }
-
-  // get reflowed(): boolean {
-  //   return this._reflowed
-  // }
-
-  // set reflowed(state: boolean) {
-  //   console.log(this.id, 'was marked as reflowed')
-  //   if (state) {
-  //     console.log(this.placement.clone)
-  //     this.originalPlacement = this.placement.clone
-  //   }
-  //   this._reflowed = state
-  // }
-
-  // get placementRanges() : {col: number[], row: number[]} {
-  //   return {
-  //     col: range(this.placement.col, this.placement.col + this.placement.width),
-  //     row: range(this.placement.row, this.placement.row + this.placement.height)
-  //   }
-  // }
 }

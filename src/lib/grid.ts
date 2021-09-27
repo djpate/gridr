@@ -156,6 +156,14 @@ export class Grid {
     return placement
   }
 
+  delete(widget: Widget): void {
+    delete this._widgets[widget.id]
+    for(let row = widget.placement!.endRow; row >= widget.placement!.startRow; row--){
+      const rowData = this.gridMap.rowData(row)
+      if (!rowData.length) this.gridMap.deleteRow(row)
+    }
+  }
+
   get gridMap(): GridMap {
     return new GridMap(this)
   }

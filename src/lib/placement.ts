@@ -13,22 +13,22 @@ export class Placement {
     this.endRow = endRow
   }
 
-  get width() {
+  get width(): number {
     return this.endCol - this.startCol
   }
 
-  get height() {
+  get height(): number {
     return this.endRow - this.startRow
   }
 
-  get ranges() {
+  get ranges(): {col: number[], row: number[]} {
     return {
       col: range(this.startCol, this.endCol),
       row: range(this.startRow, this.endRow)
     }
   }
 
-  moveColumn(columnIndex: number) {
+  moveColumn(columnIndex: number): void {
     const width = this.width
     this.startCol = columnIndex
     this.endCol = columnIndex + width
@@ -43,6 +43,13 @@ export class Placement {
 
   clone() : Placement {
     return new Placement(this.startCol, this.endCol, this.startRow, this.endRow)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  foreachRow(callback: (rowId: number) => any): void {
+    for(let i=this.startRow; i < this.endRow; i++) {
+      callback(i)
+    }
   }
 
 }
