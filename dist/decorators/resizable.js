@@ -1,3 +1,7 @@
+"use strict";
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resizable = void 0;
 var Position;
 (function (Position) {
     Position["topLeft"] = "topLeft";
@@ -5,19 +9,20 @@ var Position;
     Position["bottomLeft"] = "bottomLeft";
     Position["bottomRight"] = "bottomRight";
 })(Position || (Position = {}));
-export const resizable = (widget) => {
-    [Position.topLeft, Position.topRight, Position.bottomLeft, Position.bottomRight].forEach((position) => {
-        const resizeHandle = document.createElement("div");
+var resizable = function (widget) {
+    [Position.topLeft, Position.topRight, Position.bottomLeft, Position.bottomRight].forEach(function (position) {
+        var resizeHandle = document.createElement("div");
         resizeHandle.classList.add('resizer');
         resizeHandle.classList.add(String(position));
         resizeHandle.addEventListener('mousedown', startResize.bind(widget, position));
         widget.element.appendChild(resizeHandle);
     });
 };
-const startResize = function (position, event) {
+exports.resizable = resizable;
+var startResize = function (position, event) {
     event.preventDefault();
-    const size = this.element.getBoundingClientRect();
-    const initial = {
+    var size = this.element.getBoundingClientRect();
+    var initial = {
         mousex: event.pageX,
         mousey: event.pageY,
         width: size.width,
@@ -29,59 +34,59 @@ const startResize = function (position, event) {
     };
     this.element.style.position = 'absolute';
     this.moving = true;
-    const mouseMoveHandler = HandlerMap[position].bind(this, initial);
-    const mouseUpHandler = stopResize.bind(this, mouseMoveHandler);
+    var mouseMoveHandler = HandlerMap[position].bind(this, initial);
+    var mouseUpHandler = stopResize.bind(this, mouseMoveHandler);
     window.addEventListener('mousemove', mouseMoveHandler);
     window.addEventListener('mouseup', mouseUpHandler, { once: true });
 };
-const stopResize = function (mouseMoveHandler, event) {
+var stopResize = function (mouseMoveHandler, event) {
     window.removeEventListener('mousemove', mouseMoveHandler);
     this.moving = false;
 };
-const bottomRight = function (initial, event) {
+var bottomRight = function (initial, event) {
     this.applyCoords({
         width: initial.width + (event.pageX - initial.mousex),
         height: initial.height + (event.pageY - initial.mousey),
     });
-    const ghostPlacement = this.grid.placement(this);
+    var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
-const bottomLeft = function (initial, event) {
+var bottomLeft = function (initial, event) {
     this.applyCoords({
         width: initial.width - (event.pageX - initial.mousex),
         height: initial.height + (event.pageY - initial.mousey),
         left: initial.originalx + (event.pageX - initial.mousex)
     });
-    const ghostPlacement = this.grid.placement(this);
+    var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
-const topRight = function (initial, event) {
+var topRight = function (initial, event) {
     this.applyCoords({
         width: initial.width + (event.pageX - initial.mousex),
         height: initial.height - (event.pageY - initial.mousey),
         top: initial.originaly + (event.pageY - initial.mousey),
     });
-    const ghostPlacement = this.grid.placement(this);
+    var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
-const topLeft = function (initial, event) {
+var topLeft = function (initial, event) {
     this.applyCoords({
         width: initial.width - (event.pageX - initial.mousex),
         height: initial.height - (event.pageY - initial.mousey),
         top: initial.originaly + (event.pageY - initial.mousey),
         left: initial.originalx + (event.pageX - initial.mousex)
     });
-    const ghostPlacement = this.grid.placement(this);
+    var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
-const HandlerMap = {
-    [Position.topLeft]: topLeft,
-    [Position.topRight]: topRight,
-    [Position.bottomLeft]: bottomLeft,
-    [Position.bottomRight]: bottomRight
-};
+var HandlerMap = (_a = {},
+    _a[Position.topLeft] = topLeft,
+    _a[Position.topRight] = topRight,
+    _a[Position.bottomLeft] = bottomLeft,
+    _a[Position.bottomRight] = bottomRight,
+    _a);
 //# sourceMappingURL=resizable.js.map
