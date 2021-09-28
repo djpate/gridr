@@ -16,6 +16,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "types": [
+      "webpack-env",
       "resize-observer-browser"
     ],
     "paths": {

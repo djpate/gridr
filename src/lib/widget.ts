@@ -1,4 +1,4 @@
-import { Coords } from "@/components/types"
+import { Coords } from "./types"
 import { uniqueId, wrap } from "lodash"
 import { draggable } from "./decorators/draggable"
 import { resizable } from "./decorators/resizable"

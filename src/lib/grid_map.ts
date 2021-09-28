@@ -2,7 +2,6 @@ import { intersection, last, range, times } from "lodash";
 import { Grid } from "./grid";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
-import { v4 as uuid } from 'uuid'
 
 export class GridMap {
   grid: Grid

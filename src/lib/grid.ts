@@ -1,4 +1,4 @@
-import { Coords } from "@/components/types"
+import { Coords } from "./types"
 import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";

@@ -1,4 +1,4 @@
-import { Coords } from "@/components/types"
+import { Coords } from "../types"
 import { Widget } from "../widget"
 type initialCoordinates = {
   offsetX: number,
