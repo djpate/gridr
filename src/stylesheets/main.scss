@@ -1,29 +1,25 @@
 .grid_root {
-  margin: 20px;
   position: relative;
+  &::after {
+    clear: both;
+  }
   .shadowGrid {
-    width: fit-content;
+    width: 100%;
     .shadowRow {
       display: flex;
       flex-direction: row;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       width: 100%;
       height: 150px;
-      justify-content: space-evenly;
+      justify-content: flex-start;
+      gap: 20px;
       margin-bottom: 20px;
-      &::first-child {
-        margin-bottom: 0;
-      }
       .shadowCol {
-        display: flex;
-        width: calc(calc((100vw - 140px) / 6));
         height: 100%;
         border: 1px dashed blue;
         box-sizing: border-box;
-        margin-right: 20px;
-        &:last-child {
-          margin-right: 0;
-        }
+        flex-shrink: 0;
+        flex-grow: 1;
       }
     }
   }
@@ -41,9 +37,6 @@
     transition-duration: 0.2s;
   }
   .widget_container {
-    border: 1px solid grey;
-    filter: drop-shadow(5px 5px 2px #e1e1e1);
-    background-color: white;
     position: absolute;
     &.snapped {
       transition-property: width, height, top, left;

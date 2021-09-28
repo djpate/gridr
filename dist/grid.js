@@ -167,7 +167,8 @@ var Grid = /** @class */ (function () {
     Object.defineProperty(Grid.prototype, "columnWidth", {
         get: function () {
             var _a;
-            return (_a = this._columnWidth) !== null && _a !== void 0 ? _a : (this._columnWidth = Math.round((this.width - (this.columnPadding * (this.columns - 1))) / this.columns));
+            // 2 is for each border
+            return (_a = this._columnWidth) !== null && _a !== void 0 ? _a : (this._columnWidth = Math.ceil((this.width - (this.columnPadding * (this.columns - 1))) / this.columns) - 2);
         },
         enumerable: false,
         configurable: true
@@ -207,6 +208,8 @@ var Grid = /** @class */ (function () {
                 for (var col = 0; col < Math.min(this.columns, placement.endCol + 1); col++) {
                     var cell = document.createElement("div");
                     cell.classList.add('shadowCol');
+                    cell.style.flexBasis = this.columnWidth + "px";
+                    cell.style.maxWidth = this.columnWidth + "px";
                     rowElement.appendChild(cell);
                 }
             }

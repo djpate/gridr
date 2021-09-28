@@ -97,7 +97,8 @@ export class Grid {
   }
 
   get columnWidth(): number {
-    return this._columnWidth ??= Math.round((this.width - (this.columnPadding * (this.columns - 1))) / this.columns)
+    // 2 is for each border
+    return this._columnWidth ??= Math.ceil((this.width - (this.columnPadding * (this.columns - 1))) / this.columns) - 2
   }
 
   get widgets(): Widget[] {
@@ -124,6 +125,8 @@ export class Grid {
       for(let col = 0; col < Math.min(this.columns, placement.endCol + 1); col++) {
         const cell = document.createElement("div")
         cell.classList.add('shadowCol')
+        cell.style.flexBasis = `${this.columnWidth}px`
+        cell.style.maxWidth = `${this.columnWidth}px`
         rowElement.appendChild(cell)
       }
     }

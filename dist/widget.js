@@ -109,8 +109,6 @@ var Widget = /** @class */ (function () {
         writable: true,
         value: function () {
             if (!this.placement)
-                debugger;
-            if (!this.placement)
                 return;
             this.element.classList.add('snapped');
             this.applyCoords({
