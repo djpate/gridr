@@ -34,9 +34,11 @@ var stopDrag = function (mouseMoveHandler, event) {
 };
 var drag = function (initial, event) {
     event.preventDefault();
+    var offsetTop = this.grid.rootElement.getBoundingClientRect().top + window.scrollY;
+    var offsetLeft = this.grid.rootElement.getBoundingClientRect().left;
     var coord = {
-        top: Math.floor(event.pageY - this.grid.rootElement.offsetTop - initial.offsetY),
-        left: Math.floor(event.pageX - initial.offsetX),
+        top: Math.floor(event.pageY - offsetTop - initial.offsetY),
+        left: Math.floor(event.pageX - initial.offsetX - offsetLeft),
     };
     this.applyCoords(coord);
     var ghostPlacement = this.grid.placement(this);

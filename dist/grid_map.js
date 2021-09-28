@@ -55,7 +55,6 @@ var GridMap = /** @class */ (function () {
             var row = 0;
             var max = 0;
             var lastWidgetOnCol;
-            console.log(this.map);
             for (;;) {
                 var rowData = this.rowData(row);
                 if (rowData[col] !== undefined) {
@@ -71,8 +70,6 @@ var GridMap = /** @class */ (function () {
                 }
                 row++;
             }
-            console.log('last wid', lastWidgetOnCol);
-            console.log('max for', col, 'is', max);
             return max;
         }
     });

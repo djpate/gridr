@@ -89,6 +89,7 @@ export class Widget {
     if (this.placement && this.placement.sameAs(placement)) return
     const collisions = this.grid.gridMap.collisions(placement, this.id)
     this.placement = placement
+    this.grid.setContainerHeight()
     collisions.forEach((collidingWidget) => {
       const newPlacement = collidingWidget.closestNewSpot()
       collidingWidget.placement = newPlacement

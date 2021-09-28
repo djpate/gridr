@@ -5,6 +5,7 @@
   <div id="grid">
     <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :id='name' :key='name'></Widget>
   </div>
+  <footer>FOOTER</footer>
 </template>
 
 <script lang="ts">
@@ -34,11 +35,6 @@ export default class App extends Vue {
 
   mounted(): void {
     this.grid = new Grid('grid', 6)
-    // this.demoSetup()
-  }
-
-  snapped(): void {
-    // this.hideSnapGrid();
   }
 
   addNewWidget(): void {

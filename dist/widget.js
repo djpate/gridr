@@ -159,6 +159,7 @@ var Widget = /** @class */ (function () {
                 return;
             var collisions = this.grid.gridMap.collisions(placement, this.id);
             this.placement = placement;
+            this.grid.setContainerHeight();
             collisions.forEach(function (collidingWidget) {
                 var newPlacement = collidingWidget.closestNewSpot();
                 collidingWidget.placement = newPlacement;

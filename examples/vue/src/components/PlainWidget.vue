@@ -1,5 +1,5 @@
 <template>
-  <div :id='id' :data-width='width' :data-height='height'>
+  <div class='wid' :id='id' :data-width='width' :data-height='height'>
     <h1 class='dragHandle'>Hello {{ id }}</h1>
     <span class='closeHandle'>X</span>
     <span> {{ counter }}</span>
@@ -34,6 +34,11 @@ export default class PlainWidget extends Vue {
 </script>
 
 <style lang='scss' scoped>
+
+.wid {
+  border: 1px solid black;
+  height: 100%;
+}
 .closeHandle {
   position: absolute;
   top: 10px;

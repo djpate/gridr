@@ -21,7 +21,7 @@ const startDrag = function(this: Widget, event: MouseEvent) {
   const initial: initialCoordinates = {
     offsetX:  event.offsetX,
     offsetY: event.offsetY,
-  width: size.width,
+    width: size.width,
     height: size.height
   }
   this.element.style.width = `${size.width}px`
@@ -42,9 +42,11 @@ const stopDrag = function (this: Widget, mouseMoveHandler: (event: MouseEvent) =
 
 const drag = function(this: Widget, initial: initialCoordinates, event: DragEvent) {
   event.preventDefault()
+  const offsetTop = this.grid.rootElement.getBoundingClientRect().top + window.scrollY
+  const offsetLeft = this.grid.rootElement.getBoundingClientRect().left
   const coord: Coords = {
-    top: Math.floor(event.pageY - this.grid.rootElement.offsetTop - initial.offsetY),
-    left:  Math.floor(event.pageX - initial.offsetX),
+    top: Math.floor(event.pageY - offsetTop - initial.offsetY),
+    left:  Math.floor(event.pageX - initial.offsetX - offsetLeft),
   }
   this.applyCoords(coord)
   const ghostPlacement = this.grid.placement(this)

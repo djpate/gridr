@@ -52,6 +52,7 @@ export class Grid {
     this.observer = new MutationObserver(this.newWidgetObserver.bind(this))
     this.observer.observe(this.rootElement, {subtree: false, childList: true})
     this.setupInitialWidgets()
+    this.setContainerHeight()
     window.addEventListener('resize', this.resized.bind(this))
   }
 
@@ -59,6 +60,12 @@ export class Grid {
     this._width = undefined
     this._columnWidth = undefined
     this.widgets.forEach((widget) => widget.snap())
+    this.setContainerHeight()
+  }
+
+  setContainerHeight() {
+    const lastRow = this.gridMap.lastRow + 1
+    this.rootElement.style.height = `${lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding)}px`
   }
 
   setupInitialWidgets(): void {
@@ -163,7 +170,6 @@ export class Grid {
 
   delete(widget: Widget): void {
     delete this._widgets[widget.id]
-    console.log(widget.placement)
     if (!widget.placement) {
       console.error('widget', widget.id, 'does not have a placement ?')
       return

@@ -37,7 +37,6 @@ export class GridMap {
     let row = 0
     let max = 0
     let lastWidgetOnCol: string | undefined
-    console.log(this.map)
     for(;;) {
       const rowData = this.rowData(row)
       if (rowData[col] !== undefined) {
@@ -51,8 +50,6 @@ export class GridMap {
       }
       row++
     }
-    console.log('last wid', lastWidgetOnCol)
-    console.log('max for', col, 'is', max)
     return max
   }
 

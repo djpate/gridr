@@ -19,6 +19,7 @@ export declare class Grid {
     observer: MutationObserver;
     constructor(id: string, columns: number);
     resized(): void;
+    setContainerHeight(): void;
     setupInitialWidgets(): void;
     setupWidget(element: HTMLDivElement): void;
     newWidgetObserver(mutations: MutationRecord[], observer: MutationObserver): void;

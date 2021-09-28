@@ -99,6 +99,7 @@ var Grid = /** @class */ (function () {
         this.observer = new MutationObserver(this.newWidgetObserver.bind(this));
         this.observer.observe(this.rootElement, { subtree: false, childList: true });
         this.setupInitialWidgets();
+        this.setContainerHeight();
         window.addEventListener('resize', this.resized.bind(this));
     }
     Object.defineProperty(Grid.prototype, "resized", {
@@ -109,6 +110,16 @@ var Grid = /** @class */ (function () {
             this._width = undefined;
             this._columnWidth = undefined;
             this.widgets.forEach(function (widget) { return widget.snap(); });
+            this.setContainerHeight();
+        }
+    });
+    Object.defineProperty(Grid.prototype, "setContainerHeight", {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: function () {
+            var lastRow = this.gridMap.lastRow + 1;
+            this.rootElement.style.height = lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding) + "px";
         }
     });
     Object.defineProperty(Grid.prototype, "setupInitialWidgets", {
@@ -258,7 +269,6 @@ var Grid = /** @class */ (function () {
         writable: true,
         value: function (widget) {
             delete this._widgets[widget.id];
-            console.log(widget.placement);
             if (!widget.placement) {
                 console.error('widget', widget.id, 'does not have a placement ?');
                 return;
