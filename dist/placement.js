@@ -50,8 +50,8 @@ var Placement = /** @class */ (function () {
     Object.defineProperty(Placement.prototype, "ranges", {
         get: function () {
             return {
-                col: lodash_1.range(this.startCol, this.endCol),
-                row: lodash_1.range(this.startRow, this.endRow)
+                col: (0, lodash_1.range)(this.startCol, this.endCol),
+                row: (0, lodash_1.range)(this.startRow, this.endRow)
             };
         },
         enumerable: false,

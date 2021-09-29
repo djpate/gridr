@@ -31,7 +31,7 @@ var GridMap = /** @class */ (function () {
             var previousColumns;
             for (;;) {
                 var columns = this.potentialStartColumnsInRow(row, width);
-                previousColumns = (previousColumns && previousColumns.length) ? lodash_1.intersection(previousColumns, columns) : columns;
+                previousColumns = (previousColumns && previousColumns.length) ? (0, lodash_1.intersection)(previousColumns, columns) : columns;
                 if (previousColumns.length) {
                     counter++;
                 }
@@ -86,7 +86,7 @@ var GridMap = /** @class */ (function () {
             if (columnsInRow > (this.grid.columns - width))
                 return [];
             if (columnsInRow === 0)
-                return lodash_1.range(this.grid.columns);
+                return (0, lodash_1.range)(this.grid.columns);
             var counter = 0;
             for (var i = 0; i < this.grid.columns; i++) {
                 if (rowData[i] === undefined)
@@ -122,7 +122,7 @@ var GridMap = /** @class */ (function () {
     Object.defineProperty(GridMap.prototype, "lastRow", {
         get: function () {
             var rowIds = Object.keys(this.map);
-            return rowIds.length ? Number(lodash_1.last(Object.keys(this.map).sort())) : 0;
+            return rowIds.length ? Number((0, lodash_1.last)(Object.keys(this.map).sort())) : 0;
         },
         enumerable: false,
         configurable: true

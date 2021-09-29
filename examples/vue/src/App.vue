@@ -3,7 +3,7 @@
     <div class="new" @mousedown='addNewWidget'>Some widget</div>
   </div>
   <div id="grid">
-    <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :id='name' :key='name'></Widget>
+    <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :ratio='value.ratio' :id='name' :key='name'></Widget>
   </div>
   <footer>FOOTER</footer>
 </template>
@@ -27,6 +27,11 @@ export default class App extends Vue {
     [uniqueId()]: {
       width: 1,
       height: 1
+    },
+    [uniqueId()]: {
+      width: 1,
+      height: 2,
+      ratio: true
     }
   }
 

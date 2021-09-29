@@ -4,6 +4,7 @@ exports.Grid = exports.getCoordsForElement = exports.constrainedInGrid = void 0;
 var grid_map_1 = require("./grid_map");
 var placement_1 = require("./placement");
 var widget_1 = require("./widget");
+var lodash_1 = require("lodash");
 // prevents the widget boundaries to leave the allowed grid
 var constrainedInGrid = function (coords, gridWidth) {
     // return {
@@ -68,6 +69,12 @@ var Grid = /** @class */ (function () {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "_gridMap", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         Object.defineProperty(this, "columns", {
             enumerable: true,
             configurable: true,
@@ -119,7 +126,7 @@ var Grid = /** @class */ (function () {
         writable: true,
         value: function () {
             var lastRow = this.gridMap.lastRow + 1;
-            this.rootElement.style.height = lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding) + "px";
+            this.rootElement.style.minHeight = lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding) + "px";
         }
     });
     Object.defineProperty(Grid.prototype, "setupInitialWidgets", {
@@ -147,9 +154,12 @@ var Grid = /** @class */ (function () {
         value: function (element) {
             var width = Number(element.dataset.width) || 1;
             var height = Number(element.dataset.height) || 1;
+            var minWidth = Number(element.dataset.minWidth) || 1;
+            var ratio = element.dataset.ratio == "true" ? width / height : undefined;
             var placement = this.gridMap.firstAvailablePlacement(width, height);
-            var widget = new widget_1.Widget(element, placement, this);
+            var widget = new widget_1.Widget(element, placement, this, { minWidth: minWidth, ratio: ratio });
             this._widgets[widget.id] = widget;
+            this.setContainerHeight();
         }
     });
     Object.defineProperty(Grid.prototype, "newWidgetObserver", {
@@ -179,7 +189,9 @@ var Grid = /** @class */ (function () {
         get: function () {
             var _a;
             // 2 is for each border
-            return (_a = this._columnWidth) !== null && _a !== void 0 ? _a : (this._columnWidth = Math.ceil((this.width - (this.columnPadding * (this.columns - 1))) / this.columns) - 2);
+            // full width - the paddings, only n-2 since we don't want padding at the first and last columns
+            var availableWidth = this.width - (this.columnPadding * (this.columns - 2));
+            return (_a = this._columnWidth) !== null && _a !== void 0 ? _a : (this._columnWidth = Math.floor(availableWidth / this.columns));
         },
         enumerable: false,
         configurable: true
@@ -230,7 +242,9 @@ var Grid = /** @class */ (function () {
             var width = (placement.width * (this.columnWidth + this.columnPadding)) - this.columnPadding - ghostPadding;
             var height = ((placement.height * (this.rowHeight + this.rowPadding)) - this.rowPadding) - ghostPadding;
             var top = Math.max(0, placement.startRow * (this.rowHeight + this.rowPadding)) + ghostPadding / 2;
-            var left = Math.max(0, placement.startCol * (this.columnWidth + this.columnPadding)) + ghostPadding / 2;
+            var left = (placement.startCol * (this.columnWidth + this.columnPadding)) + ghostPadding / 2;
+            var maxLeft = this.width - (placement.width * this.columnWidth) - ((placement.width - 1) * this.columnPadding);
+            left = (0, lodash_1.clamp)(left, 0, maxLeft);
             ghost.style.top = top + 'px';
             ghost.style.left = left + 'px';
             ghost.style.width = width + 'px';
@@ -254,13 +268,15 @@ var Grid = /** @class */ (function () {
             var parentRect = this.rootElement.getBoundingClientRect();
             var top = size.top - parentRect.top;
             var left = size.left - parentRect.left;
-            var startCol = Math.max(0, Math.min(this.columns, Math.floor(left / this.columnWidth)));
-            var endCol = Math.min(this.columns + 1, startCol + Math.ceil(size.width / (this.columnWidth + this.columnPadding)));
-            var maxStartRow = this.gridMap.maxStartingRowByCol(startCol, widget);
-            var startRow = Math.min(maxStartRow, Math.max(0, Math.floor(top / this.rowHeight)));
-            var endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding));
-            var placement = new placement_1.Placement(startCol, endCol, startRow, endRow);
-            return placement;
+            var width = Math.ceil(size.width / (this.columnPadding + this.columnWidth));
+            var startCol = Math.floor(left / this.columnWidth);
+            startCol = (0, lodash_1.clamp)(startCol, 0, this.columns - width);
+            var endCol = startCol + width;
+            var height = Math.ceil(size.height / (this.rowHeight + this.rowPadding));
+            var startRow = Math.floor(top / (this.rowHeight + this.rowPadding));
+            startRow = (0, lodash_1.clamp)(startRow, 0, 100);
+            var endRow = startRow + height;
+            return new placement_1.Placement(startCol, endCol, startRow, endRow);
         }
     });
     Object.defineProperty(Grid.prototype, "delete", {
@@ -282,7 +298,8 @@ var Grid = /** @class */ (function () {
     });
     Object.defineProperty(Grid.prototype, "gridMap", {
         get: function () {
-            return new grid_map_1.GridMap(this);
+            var _a;
+            return (_a = this._gridMap) !== null && _a !== void 0 ? _a : (this._gridMap = new grid_map_1.GridMap(this));
         },
         enumerable: false,
         configurable: true

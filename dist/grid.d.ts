@@ -14,6 +14,7 @@ export declare class Grid {
     rowPadding: number;
     _width: number | undefined;
     _columnWidth: number | undefined;
+    _gridMap: GridMap | undefined;
     columns: number;
     movingWidget: boolean;
     observer: MutationObserver;

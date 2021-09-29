@@ -13,7 +13,7 @@ type initialCoordinates = {
 
 enum Position {
   topLeft = 'topLeft',
-topRight = 'topRight',
+  topRight = 'topRight',
   bottomLeft = 'bottomLeft',
   bottomRight = 'bottomRight',
 }
@@ -52,6 +52,7 @@ const startResize = function(this: Widget, position: Position, event: MouseEvent
 const stopResize = function(this: Widget, mouseMoveHandler: any, event: MouseEvent) {
   window.removeEventListener('mousemove', mouseMoveHandler)
   this.moving = false
+  this.element.dispatchEvent(new CustomEvent('resized'))
 }
 
 const bottomRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {

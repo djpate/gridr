@@ -2,6 +2,7 @@ import { Coords } from "./types"
 import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
+import { clamp } from "lodash";
 
 // prevents the widget boundaries to leave the allowed grid
 export const constrainedInGrid = (coords: Coords, gridWidth: number): Coords => {
@@ -32,6 +33,7 @@ export class Grid {
   rowPadding = 20
   _width: number | undefined
   _columnWidth: number | undefined
+  _gridMap: GridMap | undefined
   
   columns: number
   movingWidget = false
@@ -65,7 +67,7 @@ export class Grid {
 
   setContainerHeight() {
     const lastRow = this.gridMap.lastRow + 1
-    this.rootElement.style.height = `${lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding)}px`
+    this.rootElement.style.minHeight = `${lastRow * this.rowHeight + ((lastRow - 1) * this.rowPadding)}px`
   }
 
   setupInitialWidgets(): void {
@@ -84,9 +86,12 @@ export class Grid {
   setupWidget(element: HTMLDivElement): void {
     const width = Number(element.dataset.width) || 1
     const height = Number(element.dataset.height) || 1
+    const minWidth = Number(element.dataset.minWidth) || 1
+    const ratio = element.dataset.ratio == "true" ? width / height : undefined
     const placement = this.gridMap.firstAvailablePlacement(width, height)!
-    const widget = new Widget(element as HTMLDivElement, placement, this)
+    const widget = new Widget(element as HTMLDivElement, placement, this, {minWidth: minWidth, ratio})
     this._widgets[widget.id] = widget
+    this.setContainerHeight()
   }
 
   newWidgetObserver(mutations: MutationRecord[], observer: MutationObserver): void {
@@ -105,7 +110,9 @@ export class Grid {
 
   get columnWidth(): number {
     // 2 is for each border
-    return this._columnWidth ??= Math.ceil((this.width - (this.columnPadding * (this.columns - 1))) / this.columns) - 2
+    // full width - the paddings, only n-2 since we don't want padding at the first and last columns
+    let availableWidth = this.width - (this.columnPadding * (this.columns - 2)) 
+    return this._columnWidth ??= Math.floor(availableWidth / this.columns)
   }
 
   get widgets(): Widget[] {
@@ -143,7 +150,10 @@ export class Grid {
     const width = (placement.width * (this.columnWidth + this.columnPadding)) - this.columnPadding - ghostPadding
     const height = ((placement.height * (this.rowHeight + this.rowPadding)) - this.rowPadding) - ghostPadding
     const top = Math.max(0, placement.startRow * (this.rowHeight + this.rowPadding)) + ghostPadding / 2
-    const left = Math.max(0, placement.startCol * (this.columnWidth + this.columnPadding)) + ghostPadding / 2
+    
+    let left = (placement.startCol * (this.columnWidth + this.columnPadding)) + ghostPadding / 2
+    const maxLeft = this.width - (placement.width * this.columnWidth) - ((placement.width - 1) * this.columnPadding)
+    left = clamp(left, 0, maxLeft)
     ghost.style.top = top + 'px'
     ghost.style.left = left + 'px';
     ghost.style.width = width + 'px'
@@ -159,13 +169,18 @@ export class Grid {
     const parentRect = this.rootElement.getBoundingClientRect()
     const top = size.top - parentRect.top
     const left = size.left - parentRect.left
-    const startCol = Math.max(0, Math.min(this.columns, Math.floor(left / this.columnWidth)))
-    const endCol = Math.min(this.columns + 1, startCol + Math.ceil(size.width / (this.columnWidth + this.columnPadding)))
-    const maxStartRow = this.gridMap.maxStartingRowByCol(startCol, widget)
-    const startRow = Math.min(maxStartRow, Math.max(0, Math.floor(top / this.rowHeight)))
-    const endRow = startRow + Math.ceil(size.height / (this.rowHeight + this.rowPadding))
-    const placement = new Placement(startCol, endCol, startRow, endRow)
-    return placement
+
+    const width = Math.ceil(size.width / (this.columnPadding + this.columnWidth))
+    let startCol = Math.floor(left / this.columnWidth)
+    startCol = clamp(startCol, 0, this.columns - width)
+    const endCol = startCol + width
+
+    const height = Math.ceil(size.height / (this.rowHeight + this.rowPadding))
+    let startRow = Math.floor(top / (this.rowHeight + this.rowPadding))
+    startRow = clamp(startRow, 0, 100)
+    const endRow = startRow + height
+    
+    return new Placement(startCol, endCol, startRow, endRow)
   }
 
   delete(widget: Widget): void {
@@ -181,6 +196,6 @@ export class Grid {
   }
 
   get gridMap(): GridMap {
-    return new GridMap(this)
+    return this._gridMap ??= new GridMap(this)
   }
 }

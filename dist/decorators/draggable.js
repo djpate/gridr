@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.draggable = void 0;
+var lodash_1 = require("lodash");
 var draggable = function (widget) {
     Array.from(widget.element.getElementsByClassName('dragHandle')).forEach(function (handler) {
         handler.addEventListener('mousedown', startDrag.bind(widget));
@@ -34,11 +35,15 @@ var stopDrag = function (mouseMoveHandler, event) {
 };
 var drag = function (initial, event) {
     event.preventDefault();
-    var offsetTop = this.grid.rootElement.getBoundingClientRect().top + window.scrollY;
-    var offsetLeft = this.grid.rootElement.getBoundingClientRect().left;
+    var gridSize = this.grid.rootElement.getBoundingClientRect();
+    var offsetTop = gridSize.top + window.scrollY;
+    var offsetLeft = gridSize.left;
+    var top = Math.floor(event.pageY - offsetTop - initial.offsetY);
+    var left = Math.floor(event.pageX - initial.offsetX - offsetLeft);
+    var maxLeft = gridSize.width - this.grid.columnWidth - (this.grid.columnPadding / 2);
     var coord = {
-        top: Math.floor(event.pageY - offsetTop - initial.offsetY),
-        left: Math.floor(event.pageX - initial.offsetX - offsetLeft),
+        top: Math.max(0, top),
+        left: (0, lodash_1.clamp)(left, 0, maxLeft)
     };
     this.applyCoords(coord);
     var ghostPlacement = this.grid.placement(this);
@@ -46,5 +51,6 @@ var drag = function (initial, event) {
         return;
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
+    console.log(ghostPlacement);
 };
 //# sourceMappingURL=draggable.js.map

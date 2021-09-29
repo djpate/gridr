@@ -6,7 +6,7 @@ var draggable_1 = require("./decorators/draggable");
 var resizable_1 = require("./decorators/resizable");
 var deletable_1 = require("./decorators/deletable");
 var Widget = /** @class */ (function () {
-    function Widget(element, placement, grid) {
+    function Widget(element, placement, grid, constraints) {
         // used during drag and resize events, not contained to grid
         Object.defineProperty(this, "_coords", {
             enumerable: true,
@@ -49,7 +49,19 @@ var Widget = /** @class */ (function () {
             writable: true,
             value: []
         });
+        Object.defineProperty(this, "constraints", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         Object.defineProperty(this, "element", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "originalElement", {
             enumerable: true,
             configurable: true,
             writable: true,
@@ -81,13 +93,15 @@ var Widget = /** @class */ (function () {
             value: void 0
         });
         this.grid = grid;
+        this.originalElement = element;
         this.element = element;
         this.placement = placement;
-        this.id = element.id || lodash_1.uniqueId();
+        this.id = element.id || (0, lodash_1.uniqueId)();
+        this.constraints = constraints;
         this.setupWidgetWrapper();
-        resizable_1.resizable(this);
-        draggable_1.draggable(this);
-        deletable_1.deletable(this);
+        (0, resizable_1.resizable)(this);
+        (0, draggable_1.draggable)(this);
+        (0, deletable_1.deletable)(this);
         this.snap();
     }
     Object.defineProperty(Widget.prototype, "setupWidgetWrapper", {
@@ -101,6 +115,7 @@ var Widget = /** @class */ (function () {
             wrapped.classList.add('widget_container');
             this.element = wrapped;
             this.grid.rootElement.appendChild(wrapped);
+            this.originalElement.dispatchEvent(new CustomEvent('widgetized', { detail: { widget: this } }));
         }
     });
     Object.defineProperty(Widget.prototype, "snap", {
@@ -182,6 +197,29 @@ var Widget = /** @class */ (function () {
         writable: true,
         value: function (coords) {
             var _this = this;
+            var _a, _b;
+            if (((_a = this.constraints) === null || _a === void 0 ? void 0 : _a.ratio) && (coords.width && coords.height)) {
+                var heightUnit = Math.ceil(Math.max(1, coords.height / (this.grid.rowHeight + this.grid.rowPadding)));
+                var widthUnit = Math.ceil(Math.max(1, coords.width / (this.grid.columnWidth + this.grid.columnPadding)));
+                if (heightUnit > widthUnit) {
+                    // apply based on height
+                    var minWidth = Math.ceil(heightUnit * this.constraints.ratio);
+                    var minHeightUnit = minWidth / this.constraints.ratio;
+                    coords.width = Math.max(minWidth * this.grid.columnWidth + ((minWidth - 1) * this.grid.columnPadding), coords.width);
+                    coords.height = Math.max(minHeightUnit * this.grid.rowHeight + ((minHeightUnit - 1) * this.grid.rowPadding), coords.height);
+                }
+                else {
+                    // apply based on width
+                    var minHeight = Math.ceil(widthUnit / this.constraints.ratio);
+                    var minWidthUnit = minHeight * this.constraints.ratio;
+                    coords.height = Math.max(minHeight * this.grid.rowHeight + ((minHeight - 1) * this.grid.rowPadding), coords.height);
+                    coords.width = Math.max(coords.width, minWidthUnit * this.grid.columnWidth + ((minWidthUnit - 1) * this.grid.columnPadding));
+                }
+            }
+            else if (this.minWidth && coords.width) {
+                var minWidth = ((_b = this.constraints) === null || _b === void 0 ? void 0 : _b.minWidth) || 1;
+                coords.width = Math.max(minWidth * this.grid.columnWidth, coords.width);
+            }
             Object.keys(coords).forEach(function (key) {
                 var value = coords[key];
                 _this.element.style.setProperty(key, value + "px");

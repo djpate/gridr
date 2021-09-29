@@ -42,6 +42,7 @@ var startResize = function (position, event) {
 var stopResize = function (mouseMoveHandler, event) {
     window.removeEventListener('mousemove', mouseMoveHandler);
     this.moving = false;
+    this.element.dispatchEvent(new CustomEvent('resized'));
 };
 var bottomRight = function (initial, event) {
     this.applyCoords({

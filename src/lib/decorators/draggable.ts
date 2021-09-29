@@ -1,3 +1,4 @@
+import { clamp } from "lodash"
 import { Coords } from "../types"
 import { Widget } from "../widget"
 type initialCoordinates = {
@@ -42,15 +43,21 @@ const stopDrag = function (this: Widget, mouseMoveHandler: (event: MouseEvent) =
 
 const drag = function(this: Widget, initial: initialCoordinates, event: DragEvent) {
   event.preventDefault()
-  const offsetTop = this.grid.rootElement.getBoundingClientRect().top + window.scrollY
-  const offsetLeft = this.grid.rootElement.getBoundingClientRect().left
+  const gridSize = this.grid.rootElement.getBoundingClientRect()
+  const offsetTop = gridSize.top + window.scrollY
+  const offsetLeft = gridSize.left
+  const top = Math.floor(event.pageY - offsetTop - initial.offsetY)
+  const left = Math.floor(event.pageX - initial.offsetX - offsetLeft)
+  const maxLeft = gridSize.width - this.grid.columnWidth - (this.grid.columnPadding / 2)
+
   const coord: Coords = {
-    top: Math.floor(event.pageY - offsetTop - initial.offsetY),
-    left:  Math.floor(event.pageX - initial.offsetX - offsetLeft),
+    top: Math.max(0, top),
+    left:  clamp(left, 0, maxLeft)
   }
   this.applyCoords(coord)
   const ghostPlacement = this.grid.placement(this)
   if (this.placement && ghostPlacement.sameAs(this.placement)) return
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
+  console.log(ghostPlacement)
 }
