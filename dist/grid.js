@@ -190,7 +190,7 @@ var Grid = /** @class */ (function () {
             var _a;
             // 2 is for each border
             // full width - the paddings, only n-2 since we don't want padding at the first and last columns
-            var availableWidth = this.width - (this.columnPadding * (this.columns - 2));
+            var availableWidth = this.width - (this.columnPadding * (this.columns - 1));
             return (_a = this._columnWidth) !== null && _a !== void 0 ? _a : (this._columnWidth = Math.floor(availableWidth / this.columns));
         },
         enumerable: false,

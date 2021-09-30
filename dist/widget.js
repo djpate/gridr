@@ -127,10 +127,10 @@ var Widget = /** @class */ (function () {
                 return;
             this.element.classList.add('snapped');
             this.applyCoords({
-                top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * 20,
-                left: (this.placement.startCol * this.grid.columnWidth) + this.placement.startCol * 20,
-                width: Math.floor(this.grid.columnWidth * this.placement.width + (this.placement.width - 1) * 20),
-                height: Math.floor(this.grid.rowHeight * this.placement.height + (this.placement.height - 1) * 20)
+                top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * this.grid.rowPadding,
+                left: (this.placement.startCol * this.grid.columnWidth) + this.placement.startCol * this.grid.columnPadding,
+                width: Math.floor(this.grid.columnWidth * this.placement.width + (this.placement.width - 1) * (this.grid.columnPadding)),
+                height: Math.floor(this.grid.rowHeight * this.placement.height + (this.placement.height - 1) * (this.grid.rowPadding))
             });
         }
     });
