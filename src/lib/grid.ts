@@ -111,7 +111,7 @@ export class Grid {
   get columnWidth(): number {
     // 2 is for each border
     // full width - the paddings, only n-2 since we don't want padding at the first and last columns
-    let availableWidth = this.width - (this.columnPadding * (this.columns - 2)) 
+    let availableWidth = this.width - (this.columnPadding * (this.columns - 1))
     return this._columnWidth ??= Math.floor(availableWidth / this.columns)
   }
 

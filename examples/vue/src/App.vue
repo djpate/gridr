@@ -39,7 +39,7 @@ export default class App extends Vue {
   intentTimeout = 0
 
   mounted(): void {
-    this.grid = new Grid('grid', 6)
+    this.grid = new Grid('grid', 9)
   }
 
   addNewWidget(): void {
