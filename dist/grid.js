@@ -157,6 +157,10 @@ var Grid = /** @class */ (function () {
             var minWidth = Number(element.dataset.minWidth) || 1;
             var ratio = element.dataset.ratio == "true" ? width / height : undefined;
             var placement = this.gridMap.firstAvailablePlacement(width, height);
+            if (placement.startRow !== 0) {
+                placement = new placement_1.Placement(0, width, 0, height);
+                this.gridMap.appendRow(height);
+            }
             var widget = new widget_1.Widget(element, placement, this, { minWidth: minWidth, ratio: ratio });
             this._widgets[widget.id] = widget;
             this.setContainerHeight();
@@ -274,7 +278,8 @@ var Grid = /** @class */ (function () {
             var endCol = startCol + width;
             var height = Math.ceil(size.height / (this.rowHeight + this.rowPadding));
             var startRow = Math.floor(top / (this.rowHeight + this.rowPadding));
-            startRow = (0, lodash_1.clamp)(startRow, 0, 100);
+            var maxStartRow = this.gridMap.maxStartingRowByCol(startCol, widget);
+            startRow = (0, lodash_1.clamp)(startRow, 0, maxStartRow);
             var endRow = startRow + height;
             return new placement_1.Placement(startCol, endCol, startRow, endRow);
         }

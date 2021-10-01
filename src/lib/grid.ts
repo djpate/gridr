@@ -88,7 +88,11 @@ export class Grid {
     const height = Number(element.dataset.height) || 1
     const minWidth = Number(element.dataset.minWidth) || 1
     const ratio = element.dataset.ratio == "true" ? width / height : undefined
-    const placement = this.gridMap.firstAvailablePlacement(width, height)!
+    let placement = this.gridMap.firstAvailablePlacement(width, height)!
+    if (placement.startRow !== 0) {
+      placement = new Placement(0, width, 0, height)
+      this.gridMap.appendRow(height)
+    }
     const widget = new Widget(element as HTMLDivElement, placement, this, {minWidth: minWidth, ratio})
     this._widgets[widget.id] = widget
     this.setContainerHeight()
@@ -177,7 +181,8 @@ export class Grid {
 
     const height = Math.ceil(size.height / (this.rowHeight + this.rowPadding))
     let startRow = Math.floor(top / (this.rowHeight + this.rowPadding))
-    startRow = clamp(startRow, 0, 100)
+    const maxStartRow = this.gridMap.maxStartingRowByCol(startCol, widget)
+    startRow = clamp(startRow, 0, maxStartRow)
     const endRow = startRow + height
     
     return new Placement(startCol, endCol, startRow, endRow)

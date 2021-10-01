@@ -91,6 +91,27 @@ export class GridMap {
     return rowIds.length ? Number(last(Object.keys(this.map).sort())) : 0
   }
 
+  appendRow(numRows: number): void {
+    const visited = new Set<string>();
+    for(let row = 0; row <= this.lastRow; row++) {
+      const rowData = this.rowData(row)
+      for(let col = 0; col < this.grid.columns; col++) {
+        const cell = rowData[col]
+        if (cell !== undefined && !visited.has(cell)) {
+          visited.add(cell)
+        }
+      }
+    }
+    visited.forEach((widgetId) => {
+      const widget = this.grid.widget(widgetId)
+      const placement: Placement = this.grid.widget(widgetId).placement!.clone()
+      placement.startRow = placement.startRow + numRows
+      placement.endRow = placement.endRow + numRows
+      widget.placement = placement
+      widget.snap()
+    })
+  }
+
   deleteRow(rowId: number): void {
     const lastRow = this.lastRow
     const visited = new Set<string>();

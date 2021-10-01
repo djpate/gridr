@@ -127,6 +127,32 @@ var GridMap = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(GridMap.prototype, "appendRow", {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: function (numRows) {
+            var _this = this;
+            var visited = new Set();
+            for (var row = 0; row <= this.lastRow; row++) {
+                var rowData = this.rowData(row);
+                for (var col = 0; col < this.grid.columns; col++) {
+                    var cell = rowData[col];
+                    if (cell !== undefined && !visited.has(cell)) {
+                        visited.add(cell);
+                    }
+                }
+            }
+            visited.forEach(function (widgetId) {
+                var widget = _this.grid.widget(widgetId);
+                var placement = _this.grid.widget(widgetId).placement.clone();
+                placement.startRow = placement.startRow + numRows;
+                placement.endRow = placement.endRow + numRows;
+                widget.placement = placement;
+                widget.snap();
+            });
+        }
+    });
     Object.defineProperty(GridMap.prototype, "deleteRow", {
         enumerable: false,
         configurable: true,

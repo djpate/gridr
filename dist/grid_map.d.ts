@@ -12,6 +12,7 @@ export declare class GridMap {
         [key: number]: string[];
     };
     get lastRow(): number;
+    appendRow(numRows: number): void;
     deleteRow(rowId: number): void;
     collisions(placement: Placement, widgetToIgnore?: string): Widget[];
 }
