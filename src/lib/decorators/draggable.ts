@@ -38,10 +38,14 @@ const startDrag = function(this: Widget, event: MouseEvent) {
 const stopDrag = function (this: Widget, mouseMoveHandler: (event: MouseEvent) => void, event: MouseEvent) {
   event.preventDefault()
   this.moving = false
+  let target = event.target as HTMLDivElement
+  if (target.closest('.trash')) {
+    this.delete()
+  }
   window.removeEventListener('mousemove', mouseMoveHandler)
 }
 
-const drag = function(this: Widget, initial: initialCoordinates, event: DragEvent) {
+const drag = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
   event.preventDefault()
   const gridSize = this.grid.rootElement.getBoundingClientRect()
   const offsetTop = gridSize.top + window.scrollY
@@ -51,10 +55,18 @@ const drag = function(this: Widget, initial: initialCoordinates, event: DragEven
   const maxLeft = gridSize.width - this.width - 2
 
   const coord: Coords = {
-    top: Math.max(0, top),
+    top: top,
     left:  clamp(left, 0, maxLeft)
   }
   this.applyCoords(coord)
+
+  let target = event.target as HTMLDivElement
+  if (target.closest('.trash')) {
+    this.placement = null
+    this.grid.clearGhost()
+    return
+  }
+
   const ghostPlacement = this.grid.placement(this)
   if (this.placement && ghostPlacement.sameAs(this.placement)) return
   this.grid.setGhost(ghostPlacement)

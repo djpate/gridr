@@ -22,6 +22,7 @@ export declare class Widget {
     constructor(element: HTMLDivElement, placement: Placement, grid: Grid, constraints?: Constraints);
     setupWidgetWrapper(): void;
     snap(): void;
+    get width(): number;
     set moving(state: boolean);
     closestNewSpot(): Placement;
     move(placement: Placement): void;

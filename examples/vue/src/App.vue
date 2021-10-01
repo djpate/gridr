@@ -1,6 +1,11 @@
 <template>
-  <div class="add">
-    <div class="new" @mousedown='addNewWidget'>Some widget</div>
+  <div class="actions">
+    <div class="add">
+      <div class="new" @mousedown='addNewWidget'>Some widget</div>
+    </div>
+    <div class="trash">
+      <span>Trash</span>
+    </div>
   </div>
   <div id="grid">
     <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :ratio='value.ratio' :id='name' :key='name'></Widget>
@@ -39,7 +44,7 @@ export default class App extends Vue {
   intentTimeout = 0
 
   mounted(): void {
-    this.grid = new Grid('grid', 9)
+    this.grid = new Grid('grid', 3)
   }
 
   addNewWidget(): void {
@@ -61,14 +66,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   margin-top: 60px;
-  .add {
-    margin: 0 20px;
-    user-select: none;
-    .new {
+  .actions {
+    display: flex;
+    margin-bottom: 20px;
+    .add {
+      margin-right: 20px;
+      user-select: none;
+      .new {
+        border: 1px solid black;
+        height: 100px;
+        width: 250px;
+        cursor: grab;
+      }
+    }
+    .trash {
+      margin: 0 20px;
+      user-select: none;
       border: 1px solid black;
       height: 100px;
       width: 250px;
-      cursor: grab;
     }
   }
 }

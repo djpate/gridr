@@ -134,6 +134,13 @@ var Widget = /** @class */ (function () {
             });
         }
     });
+    Object.defineProperty(Widget.prototype, "width", {
+        get: function () {
+            return this.element.getBoundingClientRect().width;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Widget.prototype, "moving", {
         set: function (state) {
             var _a;

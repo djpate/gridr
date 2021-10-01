@@ -31,6 +31,10 @@ var startDrag = function (event) {
 var stopDrag = function (mouseMoveHandler, event) {
     event.preventDefault();
     this.moving = false;
+    var target = event.target;
+    if (target.closest('.trash')) {
+        this.delete();
+    }
     window.removeEventListener('mousemove', mouseMoveHandler);
 };
 var drag = function (initial, event) {
@@ -40,12 +44,18 @@ var drag = function (initial, event) {
     var offsetLeft = gridSize.left;
     var top = Math.floor(event.pageY - offsetTop - initial.offsetY);
     var left = Math.floor(event.pageX - initial.offsetX - offsetLeft);
-    var maxLeft = gridSize.width - this.grid.columnWidth - (this.grid.columnPadding / 2);
+    var maxLeft = gridSize.width - this.width - 2;
     var coord = {
-        top: Math.max(0, top),
+        top: top,
         left: (0, lodash_1.clamp)(left, 0, maxLeft)
     };
     this.applyCoords(coord);
+    var target = event.target;
+    if (target.closest('.trash')) {
+        this.placement = null;
+        this.grid.clearGhost();
+        return;
+    }
     var ghostPlacement = this.grid.placement(this);
     if (this.placement && ghostPlacement.sameAs(this.placement))
         return;
