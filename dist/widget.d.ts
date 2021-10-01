@@ -13,6 +13,7 @@ export declare class Widget {
     minHeight: number;
     moved: Widget[];
     constraints: Constraints | undefined;
+    moveTimeout: number;
     element: HTMLDivElement;
     originalElement: HTMLDivElement;
     id: string;

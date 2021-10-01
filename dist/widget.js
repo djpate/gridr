@@ -55,6 +55,12 @@ var Widget = /** @class */ (function () {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "moveTimeout", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 0
+        });
         Object.defineProperty(this, "element", {
             enumerable: true,
             configurable: true,
@@ -125,6 +131,7 @@ var Widget = /** @class */ (function () {
         value: function () {
             if (!this.placement)
                 return;
+            clearTimeout(this.moveTimeout);
             this.element.classList.add('snapped');
             this.applyCoords({
                 top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * this.grid.rowPadding,
@@ -151,6 +158,7 @@ var Widget = /** @class */ (function () {
                 this.placement = null;
             }
             else {
+                clearTimeout(this.moveTimeout);
                 (_a = this.placement) !== null && _a !== void 0 ? _a : (this.placement = this.previousPlacement);
                 this.element.classList.remove('moving');
                 this.grid.clearGhost();
@@ -177,16 +185,21 @@ var Widget = /** @class */ (function () {
         configurable: true,
         writable: true,
         value: function (placement) {
+            var _this = this;
+            clearTimeout(this.moveTimeout);
             if (this.placement && this.placement.sameAs(placement))
                 return;
             var collisions = this.grid.gridMap.collisions(placement, this.id);
-            this.placement = placement;
-            this.grid.setContainerHeight();
-            collisions.forEach(function (collidingWidget) {
-                var newPlacement = collidingWidget.closestNewSpot();
-                collidingWidget.placement = newPlacement;
-                collidingWidget.snap();
-            });
+            var delay = collisions.length ? 300 : 0;
+            this.moveTimeout = setTimeout(function () {
+                _this.placement = placement;
+                _this.grid.setContainerHeight();
+                collisions.forEach(function (collidingWidget) {
+                    var newPlacement = collidingWidget.closestNewSpot();
+                    collidingWidget.placement = newPlacement;
+                    collidingWidget.snap();
+                });
+            }, delay);
         }
     });
     Object.defineProperty(Widget.prototype, "delete", {

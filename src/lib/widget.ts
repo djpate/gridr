@@ -1,5 +1,5 @@
 import { Coords } from "./types"
-import { min, uniqueId, wrap } from "lodash"
+import { uniqueId } from "lodash"
 import { draggable } from "./decorators/draggable"
 import { resizable } from "./decorators/resizable"
 import { deletable } from "./decorators/deletable"
@@ -65,6 +65,7 @@ export class Widget {
 
   snap(): void {
     if (!this.placement) return
+    clearTimeout(this.moveTimeout)
     this.element.classList.add('snapped')
     this.applyCoords({
       top: this.placement.startRow * this.grid.rowHeight + this.placement.startRow * this.grid.rowPadding,
@@ -85,6 +86,7 @@ export class Widget {
       this.previousPlacement = this.placement!.clone()
       this.placement = null
     } else {
+      clearTimeout(this.moveTimeout)
       this.placement ??= this.previousPlacement
       this.element.classList.remove('moving')
       this.grid.clearGhost()
