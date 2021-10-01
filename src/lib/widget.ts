@@ -26,6 +26,7 @@ export class Widget {
   minHeight = 1
   moved: Widget[] = []
   constraints: Constraints | undefined
+  moveTimeout = 0
 
   element: HTMLDivElement
   originalElement: HTMLDivElement
@@ -100,15 +101,19 @@ export class Widget {
   }
 
   move(placement: Placement): void {
+    clearTimeout(this.moveTimeout)
     if (this.placement && this.placement.sameAs(placement)) return
     const collisions = this.grid.gridMap.collisions(placement, this.id)
-    this.placement = placement
-    this.grid.setContainerHeight()
-    collisions.forEach((collidingWidget) => {
-      const newPlacement = collidingWidget.closestNewSpot()
-      collidingWidget.placement = newPlacement
-      collidingWidget.snap()
-    })
+    const delay = collisions.length ? 300 : 0
+    this.moveTimeout = setTimeout(() => {
+      this.placement = placement
+      this.grid.setContainerHeight()
+      collisions.forEach((collidingWidget) => {
+        const newPlacement = collidingWidget.closestNewSpot()
+        collidingWidget.placement = newPlacement
+        collidingWidget.snap()
+      })
+    }, delay)
   }
 
   delete(): void {
