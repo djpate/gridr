@@ -48,7 +48,7 @@ const drag = function(this: Widget, initial: initialCoordinates, event: DragEven
   const offsetLeft = gridSize.left
   const top = Math.floor(event.pageY - offsetTop - initial.offsetY)
   const left = Math.floor(event.pageX - initial.offsetX - offsetLeft)
-  const maxLeft = gridSize.width - this.grid.columnWidth - (this.grid.columnPadding / 2)
+  const maxLeft = gridSize.width - this.width - 2
 
   const coord: Coords = {
     top: Math.max(0, top),

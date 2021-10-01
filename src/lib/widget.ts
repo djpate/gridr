@@ -73,6 +73,10 @@ export class Widget {
     })
   }
 
+  get width(): number {
+    return this.element.getBoundingClientRect().width
+  }
+
   set moving(state: boolean) {
     if (state) {
       this.element.classList.remove('snapped')
