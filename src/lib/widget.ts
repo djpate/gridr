@@ -1,5 +1,5 @@
 import { Coords } from "./types"
-import { uniqueId } from "lodash"
+import { clamp, replace, uniqueId } from "lodash"
 import { draggable } from "./decorators/draggable"
 import { resizable } from "./decorators/resizable"
 import { deletable } from "./decorators/deletable"
@@ -8,6 +8,7 @@ import { Placement } from "./placement"
 
 type Constraints = {
   minWidth?: number,
+  minHeight?: number,
   ratio?: number
 }
 
@@ -123,30 +124,56 @@ export class Widget {
     this.grid.delete(this)
   }
 
-  applyCoords(coords: Coords): void {
-    if (this.constraints?.ratio && (coords.width && coords.height)) {
-      const heightUnit = Math.ceil(Math.max(1, coords.height / (this.grid.rowHeight + this.grid.rowPadding)))
-      const widthUnit = Math.ceil(Math.max(1, coords.width / (this.grid.columnWidth + this.grid.columnPadding)))
-      if (heightUnit > widthUnit) {
-        // apply based on height
-        const minWidth = Math.ceil(heightUnit * this.constraints.ratio)
-        const minHeightUnit = minWidth / this.constraints.ratio
-        coords.width = Math.max(minWidth * this.grid.columnWidth + ((minWidth - 1) * this.grid.columnPadding), coords.width)
-        coords.height = Math.max(minHeightUnit * this.grid.rowHeight + ((minHeightUnit - 1) * this.grid.rowPadding), coords.height)
-      } else {
-        // apply based on width
-        const minHeight = Math.ceil(widthUnit / this.constraints.ratio)
-        const minWidthUnit = minHeight * this.constraints.ratio
-        coords.height = Math.max(minHeight * this.grid.rowHeight + ((minHeight - 1) * this.grid.rowPadding), coords.height)
-        coords.width = Math.max(coords.width, minWidthUnit * this.grid.columnWidth + ((minWidthUnit - 1) * this.grid.columnPadding))
-      }
-    } else if (this.minWidth && coords.width) {
-      const minWidth = this.constraints?.minWidth || 1
-      coords.width = Math.max(minWidth * this.grid.columnWidth, coords.width)
+  get currentCoords(): Coords {
+    const computedStyle = window.getComputedStyle(this.element, null)
+    return {
+      top: Number(replace(computedStyle.getPropertyValue('top'), 'px', '')),
+      left: Number(replace(computedStyle.getPropertyValue('left'), 'px', '')),
+      width: Number(replace(computedStyle.getPropertyValue('width'), 'px', '')),
+      height: Number(replace(computedStyle.getPropertyValue('height'), 'px', ''))
     }
-  
-    Object.keys(coords).forEach((key) => {
-      const value: number = coords[key as keyof Coords]!
+  }
+
+  applyCoords(coords: Partial<Coords>): void {
+    let newCoords = Object.assign({}, this.currentCoords, coords) as Coords
+    // if (this.constraints?.ratio) {
+    //   const heightUnit = Math.ceil(Math.max(1, newCoords.height / (this.grid.rowHeight + this.grid.rowPadding)))
+    //   const widthUnit = Math.ceil(Math.max(1, newCoords.width / (this.grid.columnWidth + this.grid.columnPadding)))
+    //   if (heightUnit > widthUnit) {
+    //     // apply based on height
+    //     const minWidth = Math.ceil(heightUnit * this.constraints.ratio)
+    //     const minHeightUnit = minWidth / this.constraints.ratio
+    //     newCoords.width = Math.max(minWidth * this.grid.columnWidth + ((minWidth - 1) * this.grid.columnPadding)), newCoords.width)
+    //     newCoords.height = Math.max(minHeightUnit * this.grid.rowHeight + ((minHeightUnit - 1) * this.grid.rowPadding), newCoords.height)
+    //   } else {
+    //     // apply based on width
+    //     const minHeight = Math.ceil(widthUnit / this.constraints.ratio)
+    //     const minWidthUnit = minHeight * this.constraints.ratio
+    //     newCoords.height = Math.max(minHeight * this.grid.rowHeight + ((minHeight - 1) * this.grid.rowPadding), newCoords.height)
+    //     newCoords.width = Math.max(newCoords.width, minWidthUnit * this.grid.columnWidth + ((minWidthUnit - 1) * this.grid.columnPadding))
+    //   }
+    // } else if (this.minWidth) {
+    //   const minWidth = this.constraints?.minWidth || 1
+    //   newCoords.width = Math.max(minWidth * this.grid.columnWidth, newCoords.width)
+    // }
+
+    // clamp width
+    let minWidth = (this.constraints?.minWidth || 1) * this.grid.columnWidth
+    let maxWidth = Math.min(this.grid.width, this.grid.width - (this.grid.width - newCoords.width))
+    newCoords.width = clamp(newCoords.width, minWidth, maxWidth)
+
+    // clamp height
+    let minHeight = (this.constraints?.minHeight || 1) * this.grid.rowHeight
+    newCoords.height = Math.max(newCoords.height, minHeight)
+
+    //clamp left
+    newCoords.left = clamp(newCoords.left, 0, this.grid.width - newCoords.width)
+
+    //clamp top
+    newCoords.top = Math.max(newCoords.top, 0)
+
+    Object.keys(newCoords).forEach((key) => {
+      const value: number = newCoords[key as keyof Coords]!
       this.element.style.setProperty(key, `${value}px`)
     })
   }

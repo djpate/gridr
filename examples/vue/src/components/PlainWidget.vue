@@ -1,8 +1,10 @@
 <template>
-  <div class='wid' :id='id' :data-width='width' :data-height='height' :data-ratio='ratio'>
-    <h1 class='dragHandle'>Hello {{ id }}</h1>
-    <span class='closeHandle'>X</span>
-    <span> {{ counter }}</span>
+  <div class='card h-100' :id='id' :data-width='width' :data-height='height' :data-ratio='ratio'>
+    <div class="card-body h-100">
+      <h5 class="card-title dragHandle">Widget ID: {{id}}</h5>
+      <span class='closeHandle'>X</span>
+      <span> {{ counter }}</span>
+    </div>
   </div>
 </template>
 

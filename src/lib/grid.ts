@@ -2,7 +2,7 @@ import { Coords } from "./types"
 import { GridMap } from "./grid_map";
 import { Placement } from "./placement";
 import { Widget } from "./widget";
-import { clamp } from "lodash";
+import { add, clamp } from "lodash";
 
 // prevents the widget boundaries to leave the allowed grid
 export const constrainedInGrid = (coords: Coords, gridWidth: number): Coords => {
@@ -101,7 +101,7 @@ export class Grid {
   newWidgetObserver(mutations: MutationRecord[], observer: MutationObserver): void {
     mutations.forEach((mutation_record) => {
       mutation_record.addedNodes.forEach((addedNode) => {
-        if ((addedNode as HTMLElement).classList.contains('widget')) {
+        if ((addedNode as HTMLElement).classList?.contains('widget')) {
           this.setupWidget(addedNode as HTMLDivElement)
         }
       })

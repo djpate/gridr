@@ -1,14 +1,24 @@
 <template>
-  <div class="actions">
-    <div class="add">
-      <div class="new" @mousedown='addNewWidget'>Some widget</div>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+         <div class="actions">
+          <div class="add">
+            <div class="new" @mousedown='addNewWidget'>Some widget</div>
+          </div>
+          <div class="trash">
+            <span>Trash</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="trash">
-      <span>Trash</span>
+    <div class="row">
+      <div class="col">
+        <div id="grid">
+          <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :ratio='value.ratio' :id='name' :key='name'></Widget>
+        </div>
+      </div>
     </div>
-  </div>
-  <div id="grid">
-    <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :ratio='value.ratio' :id='name' :key='name'></Widget>
   </div>
   <footer>FOOTER</footer>
 </template>
@@ -18,6 +28,7 @@ import { random, uniqueId } from 'lodash';
 import { Options, Vue } from 'vue-class-component';
 import Widget from './components/PlainWidget.vue';
 import { Grid } from '../../../src/lib/grid';
+import 'bootstrap/dist/css/bootstrap.css'
 
 @Options({
   components: {
