@@ -23,8 +23,6 @@ export class Widget {
 
   _moving = false
   _reflowed = false
-  minWidth = 1
-  minHeight = 1
   moved: Widget[] = []
   constraints: Constraints | undefined
   moveTimeout = 0
@@ -80,6 +78,16 @@ export class Widget {
     return this.element.getBoundingClientRect().width
   }
 
+  get minWidth(): number {
+    const unit = (this.constraints?.minWidth || 1)
+    return unit * this.grid.columnWidth + ((unit - 1) * this.grid.columnPadding)
+  }
+
+  get minHeight(): number {
+    const unit = (this.constraints?.minHeight || 1)
+    return unit * this.grid.rowHeight + ((unit - 1) * this.grid.rowPadding)
+  }
+
   set moving(state: boolean) {
     if (state) {
       this.element.classList.remove('snapped')
@@ -107,7 +115,7 @@ export class Widget {
     clearTimeout(this.moveTimeout)
     if (this.placement && this.placement.sameAs(placement)) return
     const collisions = this.grid.gridMap.collisions(placement, this.id)
-    const delay = collisions.length ? 300 : 0
+    const delay = collisions.length ? 150 : 0
     this.moveTimeout = setTimeout(() => {
       this.placement = placement
       this.grid.setContainerHeight()
@@ -157,20 +165,20 @@ export class Widget {
     //   newCoords.width = Math.max(minWidth * this.grid.columnWidth, newCoords.width)
     // }
 
-    // clamp width
-    let minWidth = (this.constraints?.minWidth || 1) * this.grid.columnWidth
-    let maxWidth = Math.min(this.grid.width, this.grid.width - (this.grid.width - newCoords.width))
-    newCoords.width = clamp(newCoords.width, minWidth, maxWidth)
+    // // clamp width
+    // let minWidth = (this.constraints?.minWidth || 1) * this.grid.columnWidth
+    // let maxWidth = Math.min(this.grid.width, this.grid.width - (this.grid.width - newCoords.width))
+    // newCoords.width = clamp(newCoords.width, minWidth, maxWidth)
 
-    // clamp height
-    let minHeight = (this.constraints?.minHeight || 1) * this.grid.rowHeight
-    newCoords.height = Math.max(newCoords.height, minHeight)
+    // // clamp height
+    // let minHeight = (this.constraints?.minHeight || 1) * this.grid.rowHeight
+    // newCoords.height = Math.max(newCoords.height, minHeight)
 
-    //clamp left
-    newCoords.left = clamp(newCoords.left, 0, this.grid.width - newCoords.width)
+    // //clamp left
+    // newCoords.left = clamp(newCoords.left, 0, this.grid.width - newCoords.width)
 
-    //clamp top
-    newCoords.top = Math.max(newCoords.top, 0)
+    // //clamp top
+    // newCoords.top = Math.max(newCoords.top, 0)
 
     Object.keys(newCoords).forEach((key) => {
       const value: number = newCoords[key as keyof Coords]!

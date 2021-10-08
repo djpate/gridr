@@ -1,3 +1,4 @@
+import { clamp, max } from "lodash"
 import { Widget } from "../widget"
 
 type initialCoordinates = {
@@ -58,8 +59,8 @@ const stopResize = function(this: Widget, mouseMoveHandler: any, event: MouseEve
 const bottomRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
   const maxWidth = this.grid.width - initial.originalx
   this.applyCoords({
-    width: Math.min(maxWidth, initial.width + (event.pageX - initial.mousex)),
-    height: initial.height + (event.pageY - initial.mousey),
+    width: clamp(initial.width + (event.pageX - initial.mousex), this.minWidth, maxWidth),
+    height: Math.max(this.minHeight, initial.height + (event.pageY - initial.mousey)),
   })
   const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
@@ -68,11 +69,11 @@ const bottomRight = function(this: Widget, initial: initialCoordinates, event: M
 
 const bottomLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent) {
   let originalRight = initial.originalx + initial.width
-  let maxLeft = originalRight - ((this.constraints?.minWidth || 1) * this.grid.columnWidth)
+  let maxLeft = originalRight - this.minWidth
   this.applyCoords({
-    width: initial.width - (event.pageX - initial.mousex),
-    height: initial.height + (event.pageY - initial.mousey),
-    left: Math.min(maxLeft, initial.originalx + (event.pageX - initial.mousex))
+    width: Math.max(this.minWidth, initial.width - (Math.max(initial.leftOffset, event.pageX) - initial.mousex)),
+    height: Math.max(this.minHeight, initial.height + (event.pageY - initial.mousey)),
+    left: clamp(initial.originalx + (event.pageX - initial.mousex), 0, maxLeft)
   })
   const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
@@ -81,14 +82,11 @@ const bottomLeft = function(this: Widget, initial: initialCoordinates, event: Mo
 
 const topRight = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
   const maxWidth = this.grid.width - initial.originalx
-  console.log('height', initial.height)
-  console.log('pagey', event.pageY)
-  console.log('mousey', initial.mousey)
-  console.log('diff', event.pageY - initial.mousey)
+  const maxTop = initial.originaly + initial.height - this.minHeight
   this.applyCoords({
-    width: Math.min(maxWidth, initial.width + (event.pageX - initial.mousex)),
-    height: initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey),
-    top: initial.originaly + (event.pageY - initial.mousey),
+    width: clamp(initial.width + (event.pageX - initial.mousex), this.minWidth, maxWidth),
+    height: Math.max(this.minHeight, initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey)),
+    top: clamp(initial.originaly + (event.pageY - initial.mousey), 0, maxTop)
   })
   const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)
@@ -96,11 +94,14 @@ const topRight = function(this: Widget, initial: initialCoordinates, event: Mous
 }
 
 const topLeft = function(this: Widget, initial: initialCoordinates, event: MouseEvent)  {
+  let originalRight = initial.originalx + initial.width
+  const maxLeft = originalRight - this.minWidth
+  const maxTop = initial.originaly + initial.height - this.minHeight
   this.applyCoords({
-    width: initial.width - (event.pageX - initial.mousex),
-    height: initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey),
-    top:  initial.originaly + (event.pageY - initial.mousey),
-    left: initial.originalx + (event.pageX - initial.mousex)
+    width: Math.max(this.minWidth, initial.width - (event.pageX - initial.mousex)),
+    height: Math.max(this.minHeight, initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey)),
+    top: clamp(initial.originaly + (event.pageY - initial.mousey), 0, maxTop),
+    left: clamp(initial.originalx + (event.pageX - initial.mousex), 0, maxLeft)
   })
   const ghostPlacement = this.grid.placement(this)
   this.grid.setGhost(ghostPlacement)

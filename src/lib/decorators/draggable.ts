@@ -51,7 +51,7 @@ const drag = function(this: Widget, initial: initialCoordinates, event: MouseEve
   const offsetTop = gridSize.top + window.scrollY
   const offsetLeft = gridSize.left
   const top = Math.max(Math.floor(event.pageY - offsetTop - initial.offsetY), 0)
-  const left = Math.max(Math.floor(event.pageX - initial.offsetX - offsetLeft), 0)
+  const left = clamp(Math.floor(event.pageX - initial.offsetX - offsetLeft), 0, this.grid.width - this.width)
 
   const coord: Partial<Coords> = {
     top: top,
@@ -70,5 +70,4 @@ const drag = function(this: Widget, initial: initialCoordinates, event: MouseEve
   if (this.placement && ghostPlacement.sameAs(this.placement)) return
   this.grid.setGhost(ghostPlacement)
   this.move(ghostPlacement)
-  console.log(ghostPlacement)
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class='card h-100' :id='id' :data-width='width' :data-height='height' :data-ratio='ratio'>
+  <div class='card h-100' :id='id' :data-width='width' :data-height='height' :data-ratio='ratio' :data-min-height='minHeight'>
     <div class="card-body h-100">
       <h5 class="card-title dragHandle">Widget ID: {{id}}</h5>
       <span class='closeHandle'>X</span>
@@ -22,6 +22,7 @@ export default class PlainWidget extends Vue {
   @Prop() width!: number
   @Prop() height!: number
   @Prop({default: false}) ratio!: number
+  @Prop({default: 1}) minHeight!: number
 
   mounted(): void {
     this.updateCounter()
