@@ -45,7 +45,7 @@ export default class App extends Vue {
       height: 1
     },
     [uniqueId()]: {
-      width: 1,
+      width: 2,
       height: 2,
       minHeight: 2,
       ratio: true
@@ -56,7 +56,7 @@ export default class App extends Vue {
   intentTimeout = 0
 
   mounted(): void {
-    this.grid = new Grid('grid', 3)
+    this.grid = new Grid('grid', 6)
   }
 
   addNewWidget(): void {

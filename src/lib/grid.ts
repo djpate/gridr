@@ -124,6 +124,10 @@ export class Grid {
     return Object.values(this._widgets)
   }
 
+  get ratio(): number {
+    return this.columnWidth / this.rowHeight
+  }
+
   clearGhost(): void {
     this.rootElement.classList.remove('moving')
     const ghost = this.rootElement.getElementsByClassName('ghost')[0] as HTMLDivElement
