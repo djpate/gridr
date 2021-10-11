@@ -3,14 +3,13 @@ import { Grid } from "./grid";
 import { Placement } from "./placement";
 declare type Constraints = {
     minWidth?: number;
+    minHeight?: number;
     ratio?: number;
 };
 export declare class Widget {
     _coords: Coords;
     _moving: boolean;
     _reflowed: boolean;
-    minWidth: number;
-    minHeight: number;
     moved: Widget[];
     constraints: Constraints | undefined;
     moveTimeout: number;
@@ -24,11 +23,18 @@ export declare class Widget {
     setupWidgetWrapper(): void;
     snap(): void;
     get width(): number;
+    get widthUnit(): number;
+    get height(): number;
+    get heightUnit(): number;
+    get minWidthUnit(): number;
+    get minHeightUnit(): number;
+    get minWidth(): number;
+    get minHeight(): number;
     set moving(state: boolean);
     closestNewSpot(): Placement;
     move(placement: Placement): void;
     delete(): void;
-    applyCoords(coords: Coords): void;
+    applyCoords(coords: Partial<Coords>): void;
     set placement(placement: Placement | null);
     get placement(): Placement | null;
 }

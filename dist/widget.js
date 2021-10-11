@@ -31,18 +31,6 @@ var Widget = /** @class */ (function () {
             writable: true,
             value: false
         });
-        Object.defineProperty(this, "minWidth", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: 1
-        });
-        Object.defineProperty(this, "minHeight", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: 1
-        });
         Object.defineProperty(this, "moved", {
             enumerable: true,
             configurable: true,
@@ -148,6 +136,59 @@ var Widget = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(Widget.prototype, "widthUnit", {
+        get: function () {
+            return Math.ceil(this.width / this.grid.columnWidth);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "height", {
+        get: function () {
+            return this.element.getBoundingClientRect().height;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "heightUnit", {
+        get: function () {
+            return Math.floor(this.height / this.grid.rowHeight);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "minWidthUnit", {
+        get: function () {
+            var _a;
+            return (((_a = this.constraints) === null || _a === void 0 ? void 0 : _a.minWidth) || 1);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "minHeightUnit", {
+        get: function () {
+            var _a;
+            return (((_a = this.constraints) === null || _a === void 0 ? void 0 : _a.minHeight) || 1);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "minWidth", {
+        get: function () {
+            var unit = this.minWidthUnit;
+            return unit * this.grid.columnWidth + ((unit - 1) * this.grid.columnPadding);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Widget.prototype, "minHeight", {
+        get: function () {
+            var unit = this.minHeightUnit;
+            return unit * this.grid.rowHeight + ((unit - 1) * this.grid.rowPadding);
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Widget.prototype, "moving", {
         set: function (state) {
             var _a;
@@ -190,7 +231,7 @@ var Widget = /** @class */ (function () {
             if (this.placement && this.placement.sameAs(placement))
                 return;
             var collisions = this.grid.gridMap.collisions(placement, this.id);
-            var delay = collisions.length ? 300 : 0;
+            var delay = collisions.length ? 150 : 0;
             this.moveTimeout = setTimeout(function () {
                 _this.placement = placement;
                 _this.grid.setContainerHeight();
@@ -217,29 +258,19 @@ var Widget = /** @class */ (function () {
         writable: true,
         value: function (coords) {
             var _this = this;
-            var _a, _b;
-            if (((_a = this.constraints) === null || _a === void 0 ? void 0 : _a.ratio) && (coords.width && coords.height)) {
-                var heightUnit = Math.ceil(Math.max(1, coords.height / (this.grid.rowHeight + this.grid.rowPadding)));
-                var widthUnit = Math.ceil(Math.max(1, coords.width / (this.grid.columnWidth + this.grid.columnPadding)));
-                if (heightUnit > widthUnit) {
-                    // apply based on height
-                    var minWidth = Math.ceil(heightUnit * this.constraints.ratio);
-                    var minHeightUnit = minWidth / this.constraints.ratio;
-                    coords.width = Math.max(minWidth * this.grid.columnWidth + ((minWidth - 1) * this.grid.columnPadding), coords.width);
-                    coords.height = Math.max(minHeightUnit * this.grid.rowHeight + ((minHeightUnit - 1) * this.grid.rowPadding), coords.height);
-                }
-                else {
-                    // apply based on width
-                    var minHeight = Math.ceil(widthUnit / this.constraints.ratio);
-                    var minWidthUnit = minHeight * this.constraints.ratio;
-                    coords.height = Math.max(minHeight * this.grid.rowHeight + ((minHeight - 1) * this.grid.rowPadding), coords.height);
-                    coords.width = Math.max(coords.width, minWidthUnit * this.grid.columnWidth + ((minWidthUnit - 1) * this.grid.columnPadding));
-                }
-            }
-            else if (this.minWidth && coords.width) {
-                var minWidth = ((_b = this.constraints) === null || _b === void 0 ? void 0 : _b.minWidth) || 1;
-                coords.width = Math.max(minWidth * this.grid.columnWidth, coords.width);
-            }
+            // if (this.constraints?.ratio && coords.width && coords.height) {
+            //   let widthUnit = coords.width / (this.grid.columnWidth + this.grid.columnPadding)
+            //   let heightUnit = coords.height / (this.grid.rowHeight + this.grid.rowPadding)
+            //   if (widthUnit > heightUnit) {
+            //     let minHeightUnit = (widthUnit / this.constraints.ratio)
+            //     let minHeight = Math.max(this.minHeight, minHeightUnit * this.grid.rowHeight + ((Math.ceil(minHeightUnit) - 1) * this.grid.rowPadding))
+            //     coords.height = Math.max(minHeight, coords.height)
+            //   } else {
+            //     let minWidthUnit = (heightUnit * this.constraints.ratio)
+            //     let minWidth = Math.max(this.minWidth, minWidthUnit * this.grid.columnWidth + ((Math.ceil(minWidthUnit) - 1) * this.grid.columnPadding))
+            //     coords.width = clamp(coords.width, minWidth, this.grid.width)
+            //   }
+            // }
             Object.keys(coords).forEach(function (key) {
                 var value = coords[key];
                 _this.element.style.setProperty(key, value + "px");

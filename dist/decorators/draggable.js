@@ -42,12 +42,11 @@ var drag = function (initial, event) {
     var gridSize = this.grid.rootElement.getBoundingClientRect();
     var offsetTop = gridSize.top + window.scrollY;
     var offsetLeft = gridSize.left;
-    var top = Math.floor(event.pageY - offsetTop - initial.offsetY);
-    var left = Math.floor(event.pageX - initial.offsetX - offsetLeft);
-    var maxLeft = gridSize.width - this.width - 2;
+    var top = Math.max(Math.floor(event.pageY - offsetTop - initial.offsetY), 0);
+    var left = (0, lodash_1.clamp)(Math.floor(event.pageX - initial.offsetX - offsetLeft), 0, this.grid.width - this.width);
     var coord = {
         top: top,
-        left: (0, lodash_1.clamp)(left, 0, maxLeft)
+        left: left
     };
     this.applyCoords(coord);
     var target = event.target;
@@ -61,6 +60,5 @@ var drag = function (initial, event) {
         return;
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
-    console.log(ghostPlacement);
 };
 //# sourceMappingURL=draggable.js.map

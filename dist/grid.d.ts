@@ -27,6 +27,7 @@ export declare class Grid {
     get width(): number;
     get columnWidth(): number;
     get widgets(): Widget[];
+    get ratio(): number;
     clearGhost(): void;
     setGhost(placement: Placement): void;
     widget(id: string): Widget;

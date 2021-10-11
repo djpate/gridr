@@ -155,13 +155,14 @@ var Grid = /** @class */ (function () {
             var width = Number(element.dataset.width) || 1;
             var height = Number(element.dataset.height) || 1;
             var minWidth = Number(element.dataset.minWidth) || 1;
+            var minHeight = Number(element.dataset.minHeight) || 1;
             var ratio = element.dataset.ratio == "true" ? width / height : undefined;
             var placement = this.gridMap.firstAvailablePlacement(width, height);
             if (placement.startRow !== 0) {
                 placement = new placement_1.Placement(0, width, 0, height);
                 this.gridMap.appendRow(height);
             }
-            var widget = new widget_1.Widget(element, placement, this, { minWidth: minWidth, ratio: ratio });
+            var widget = new widget_1.Widget(element, placement, this, { minWidth: minWidth, minHeight: minHeight, ratio: ratio });
             this._widgets[widget.id] = widget;
             this.setContainerHeight();
         }
@@ -174,7 +175,8 @@ var Grid = /** @class */ (function () {
             var _this = this;
             mutations.forEach(function (mutation_record) {
                 mutation_record.addedNodes.forEach(function (addedNode) {
-                    if (addedNode.classList.contains('widget')) {
+                    var _a;
+                    if ((_a = addedNode.classList) === null || _a === void 0 ? void 0 : _a.contains('widget')) {
                         _this.setupWidget(addedNode);
                     }
                 });
@@ -203,6 +205,13 @@ var Grid = /** @class */ (function () {
     Object.defineProperty(Grid.prototype, "widgets", {
         get: function () {
             return Object.values(this._widgets);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Grid.prototype, "ratio", {
+        get: function () {
+            return this.columnWidth / this.rowHeight;
         },
         enumerable: false,
         configurable: true

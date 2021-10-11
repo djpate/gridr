@@ -2,6 +2,7 @@
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resizable = void 0;
+var lodash_1 = require("lodash");
 var Position;
 (function (Position) {
     Position["topLeft"] = "topLeft";
@@ -45,40 +46,48 @@ var stopResize = function (mouseMoveHandler, event) {
     this.element.dispatchEvent(new CustomEvent('resized'));
 };
 var bottomRight = function (initial, event) {
+    var maxWidth = this.grid.width - initial.originalx;
     this.applyCoords({
-        width: initial.width + (event.pageX - initial.mousex),
-        height: initial.height + (event.pageY - initial.mousey),
+        width: (0, lodash_1.clamp)(initial.width + (event.pageX - initial.mousex), this.minWidth, maxWidth),
+        height: Math.max(this.minHeight, initial.height + (event.pageY - initial.mousey)),
     });
     var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
 var bottomLeft = function (initial, event) {
+    var originalRight = initial.originalx + initial.width;
+    var maxLeft = originalRight - this.minWidth;
     this.applyCoords({
-        width: initial.width - (event.pageX - initial.mousex),
-        height: initial.height + (event.pageY - initial.mousey),
-        left: initial.originalx + (event.pageX - initial.mousex)
+        width: Math.max(this.minWidth, initial.width - (Math.max(initial.leftOffset, event.pageX) - initial.mousex)),
+        height: Math.max(this.minHeight, initial.height + (event.pageY - initial.mousey)),
+        left: (0, lodash_1.clamp)(initial.originalx + (event.pageX - initial.mousex), 0, maxLeft)
     });
     var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
 var topRight = function (initial, event) {
+    var maxWidth = this.grid.width - initial.originalx;
+    var maxTop = initial.originaly + initial.height - this.minHeight;
     this.applyCoords({
-        width: initial.width + (event.pageX - initial.mousex),
-        height: initial.height - (event.pageY - initial.mousey),
-        top: initial.originaly + (event.pageY - initial.mousey),
+        width: (0, lodash_1.clamp)(initial.width + (event.pageX - initial.mousex), this.minWidth, maxWidth),
+        height: Math.max(this.minHeight, initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey)),
+        top: (0, lodash_1.clamp)(initial.originaly + (event.pageY - initial.mousey), 0, maxTop)
     });
     var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
     this.move(ghostPlacement);
 };
 var topLeft = function (initial, event) {
+    var originalRight = initial.originalx + initial.width;
+    var maxLeft = originalRight - this.minWidth;
+    var maxTop = initial.originaly + initial.height - this.minHeight;
     this.applyCoords({
-        width: initial.width - (event.pageX - initial.mousex),
-        height: initial.height - (event.pageY - initial.mousey),
-        top: initial.originaly + (event.pageY - initial.mousey),
-        left: initial.originalx + (event.pageX - initial.mousex)
+        width: Math.max(this.minWidth, initial.width - (event.pageX - initial.mousex)),
+        height: Math.max(this.minHeight, initial.height - (Math.max(event.pageY, initial.topOffset) - initial.mousey)),
+        top: (0, lodash_1.clamp)(initial.originaly + (event.pageY - initial.mousey), 0, maxTop),
+        left: (0, lodash_1.clamp)(initial.originalx + (event.pageX - initial.mousex), 0, maxLeft)
     });
     var ghostPlacement = this.grid.placement(this);
     this.grid.setGhost(ghostPlacement);
