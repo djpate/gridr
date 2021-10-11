@@ -153,19 +153,19 @@ export class Widget {
   }
 
   applyCoords(coords: Partial<Coords>): void {
-    if (this.constraints?.ratio && coords.width && coords.height) {
-      let widthUnit = coords.width / (this.grid.columnWidth + this.grid.columnPadding)
-      let heightUnit = coords.height / (this.grid.rowHeight + this.grid.rowPadding)
-      if (widthUnit > heightUnit) {
-        let minHeightUnit = (widthUnit / this.constraints.ratio)
-        let minHeight = minHeightUnit * this.grid.rowHeight + ((Math.ceil(minHeightUnit) - 1) * this.grid.rowPadding)
-        coords.height = Math.max(minHeight, coords.height)
-      } else {
-        let minWidthUnit = (heightUnit * this.constraints.ratio)
-        let minWidth = minWidthUnit * this.grid.columnWidth + ((Math.ceil(minWidthUnit) - 1) * this.grid.columnPadding)
-        coords.width = clamp(coords.width, minWidth, this.grid.width)
-      }
-    }
+    // if (this.constraints?.ratio && coords.width && coords.height) {
+    //   let widthUnit = coords.width / (this.grid.columnWidth + this.grid.columnPadding)
+    //   let heightUnit = coords.height / (this.grid.rowHeight + this.grid.rowPadding)
+    //   if (widthUnit > heightUnit) {
+    //     let minHeightUnit = (widthUnit / this.constraints.ratio)
+    //     let minHeight = Math.max(this.minHeight, minHeightUnit * this.grid.rowHeight + ((Math.ceil(minHeightUnit) - 1) * this.grid.rowPadding))
+    //     coords.height = Math.max(minHeight, coords.height)
+    //   } else {
+    //     let minWidthUnit = (heightUnit * this.constraints.ratio)
+    //     let minWidth = Math.max(this.minWidth, minWidthUnit * this.grid.columnWidth + ((Math.ceil(minWidthUnit) - 1) * this.grid.columnPadding))
+    //     coords.width = clamp(coords.width, minWidth, this.grid.width)
+    //   }
+    // }
     Object.keys(coords).forEach((key) => {
       const value: number = coords[key as keyof Coords]!
       this.element.style.setProperty(key, `${value}px`)

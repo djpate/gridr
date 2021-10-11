@@ -15,7 +15,7 @@
     <div class="row">
       <div class="col">
         <div id="grid">
-          <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :minHeight='value.minHeight' :ratio='value.ratio' :id='name' :key='name'></Widget>
+          <Widget class="widget" v-for='(value, name) in widgets' :width='value.width' :height='value.height' :minWidth='value.minWidth' :minHeight='value.minHeight' :ratio='value.ratio' :id='name' :key='name'></Widget>
         </div>
       </div>
     </div>
@@ -47,6 +47,7 @@ export default class App extends Vue {
     [uniqueId()]: {
       width: 2,
       height: 2,
+      minWidth: 2,
       minHeight: 2,
       ratio: true
     }
